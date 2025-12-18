@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="İspanyolca">
+    
+    <title>Spanish Flashcards</title>
+
+    <style>
+        :root {
+            --primary: #1c1c1e;    /* iOS Dark Gray */
+            --secondary: #3a3a3c;  /* iOS Elevated Gray */
+            --accent: #ff9500;     /* iOS Orange */
+            --blue: #007aff;       /* iOS System Blue */
+            --red: #ff3b30;        /* iOS System Red */
+            --bg: #f2f2f7;         /* iOS System Background */
+            --card-bg: #ffffff;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--bg); 
+            margin: 0; padding: 0; 
+            display: flex; flex-direction: column; 
+            height: 100vh; 
+            overflow: hidden;
+            /* Prevents blue highlight on tap */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Fixed iOS Style Header */
+        .search-container {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px;
+            border-bottom: 0.5px solid #c6c6c8;
+            z-index: 100;
+        }
+
+        #verbSearch {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: none;
+            background: #e3e3e6;
+            font-size: 17px; /* iOS standard size to prevent zoom */
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        /* Card Area */
+        #flashcard-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .card-header { 
+            background-color: white; 
+            padding: 20px 15px 10px 15px; 
+            text-align: center;
+            border-bottom: 0.5px solid #eee;
+        }
+        .card-header h2 { margin: 0; font-size: 28px; font-weight: 700; color: var(--primary); }
+        .card-header span { font-size: 16px; color: #8e8e93; }
+
+        /* Table Design */
+        .table-wrapper { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 400px; }
+        th, td { border: 0.5px solid #f2f2f7; padding: 10px 2px; text-align: center; }
+        th { background: #fafafa; font-size: 11px; color: #8e8e93; text-transform: uppercase; }
+        
+        .tense-name { background-color: #fff9f2; font-weight: 700; font-size: 10px; color: var(--accent); width: 65px; }
+        .verb-form { font-size: 13px; font-weight: 600; color: var(--primary); display: block; }
+        .tr-form { font-size: 10px; color: #aeaeb2; display: block; margin-top: 2px; }
+
+        /* Examples Grid */
+        .examples-grid { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            background: white;
+        }
+        .ex-item { 
+            padding: 15px; 
+            border-bottom: 0.5px solid #f2f2f7;
+            border-left: 4px solid var(--blue);
+        }
+        .theme-tag { font-size: 10px; color: var(--blue); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; display: block; }
+        .ex-es { font-weight: 500; color: var(--primary); display: block; font-size: 15px; line-height: 1.3; margin-bottom: 4px; }
+        .ex-tr { color: #636366; font-style: italic; display: block; font-size: 13px; }
+
+        /* Tab Bar Style Navigation */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 25px calc(env(safe-area-inset-bottom) + 10px) 25px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 0.5px solid #c6c6c8;
+        }
+
+        button {
+            background: none;
+            color: var(--blue);
+            border: none;
+            padding: 10px;
+            font-weight: 600;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        button:active { opacity: 0.5; }
+        button:disabled { color: #d1d1d6; }
+        #counter { font-weight: 500; color: #8e8e93; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="search-container">
+    <input type="text" id="verbSearch" placeholder="Fiil ara..." oninput="searchVerb()">
+</div>
+
+<div id="flashcard-container"></div>
+
+<div class="controls">
+    <button id="prevBtn" onclick="changeCard(-1)">Geri</button>
+    <div id="counter">1 / 24</div>
+    <button id="nextBtn" onclick="changeCard(1)">İleri</button>
+</div>
+
+<script>
+    const verbs = [
+        {
+            es: "Trabajar", tr: "Çalışmak",
+            tenses: [
+                { name: "Pres.", forms: ["trabajo", "trabajas", "trabaja", "trabajamos", "trabajáis", "trabajan"], tr: ["çalışırım", "çalışırsın", "çalışır", "çalışırız", "çalışırsınız", "çalışırlar"] },
+                { name: "Indef.", forms: ["trabajé", "trabajaste", "trabajó", "trabajamos", "trabajasteis", "trabajaron"], tr: ["çalıştım", "çalıştın", "çalıştı", "çalıştık", "çalıştınız", "çalıştılar"] },
+                { name: "Imperf.", forms: ["trabajaba", "trabajabas", "trabajaba", "trabajábamos", "trabajabais", "trabajaban"], tr: ["çalışırdım", "çalışırdın", "çalışırdı", "çalışırdık", "çalışırdınız", "çalışırlardı"] },
+                { name: "Futuro", forms: ["trabajaré", "trabajarás", "trabajará", "trabajaremos", "trabajaréis", "trabajarán"], tr: ["çalışacağım", "çalışacaksın", "çalışacak", "çalışacağız", "çalışacaksınız", "çalışacaklar"] }
+            ],
+            ex: [
+                { t: "Bahar", es: "Yo trabajo mucho para salvar a mis pacientes.", tr: "Hastalarımı kurtarmak için çok çalışıyorum." },
+                { t: "Aşk-ı Memnu", es: "Beşir trabajó en la mansión por muchos años.", tr: "Beşir yalıda uzun yıllar boyunca çalıştı." },
+                { t: "Breaking Bad", es: "Walt trabajaba como un profesor de química.", tr: "Walt bir kimya öğretmeni olarak çalışırdı." },
+                { t: "Severance", es: "Tú trabajarás en Lumon sin recordar nada.", tr: "Hiçbir şey hatırlamadan Lumon'da çalışacaksın." }
+            ]
+        },
+        {
+            es: "Beber", tr: "İçmek",
+            tenses: [
+                { name: "Pres.", forms: ["bebo", "bebes", "bebe", "bebemos", "bebéis", "beben"], tr: ["içerim", "içersin", "içer", "içeriz", "içersiniz", "içerler"] },
+                { name: "Indef.", forms: ["bebí", "bebiste", "bebió", "bebimos", "bebisteis", "bebieron"], tr: ["içti m", "içtin", "içti", "içtik", "içtiniz", "içtiler"] },
+                { name: "Imperf.", forms: ["bebía", "bebías", "bebía", "bebíamos", "bebíais", "bebían"], tr: ["içerdim", "içerdin", "içerdi", "içerdik", "içerdiniz", "içerlerdi"] },
+                { name: "Futuro", forms: ["beberé", "beberás", "beberá", "beberemos", "beberéis", "beberán"], tr: ["içeceğim", "içeceksin", "içecek", "içeceğiz", "içeceksiniz", "içecekler"] }
+            ],
+            ex: [
+                { t: "Aşk-ı Memnu", es: "Bihter bebe vino sola en su habitación.", tr: "Bihter odasında yalnız başına şarap içiyor." },
+                { t: "Bahar", es: "Bahar bebió un té caliente con Evren hoy.", tr: "Bahar bugün Evren ile sıcak bir çay içti." },
+                { t: "HIMYM", es: "Nosotros bebíamos cerveza en el bar.", tr: "Barda bira içerdik." },
+                { t: "Breaking Bad", es: "Tú beberás mucha agua en el desierto.", tr: "Çölde çok su içeceksin." }
+            ]
+        },
+        {
+            es: "Escribir", tr: "Yazmak",
+            tenses: [
+                { name: "Pres.", forms: ["escribo", "escribes", "escribe", "escribimos", "escribís", "escriben"], tr: ["yazarım", "yazarsın", "yazar", "yazarız", "yazarsınız", "yazarlar"] },
+                { name: "Indef.", forms: ["escribí", "escribiste", "escribió", "escribimos", "escribisteis", "escribieron"], tr: ["yazdım", "yazdın", "yazdı", "yazdık", "yazdınız", "yazdılar"] },
+                { name: "Imperf.", forms: ["escribía", "escribías", "escribía", "escribíamos", "escribíais", "escribían"], tr: ["yazardım", "yazardın", "yazardı", "yazardık", "yazardınız", "yazarlardı"] },
+                { name: "Futuro", forms: ["escribiré", "escribirás", "escribirá", "escribiremos", "escribiréis", "escribirán"], tr: ["yazacağım", "yazacaksın", "yazacak", "yazacağız", "yazacaksınız", "yazacaklar"] }
+            ],
+            ex: [
+                { t: "Aşk-ı Memnu", es: "Nihal escribe secretos en su diario.", tr: "Nihal günlüğüne sırlar yazıyor." },
+                { t: "HIMYM", es: "Ted escribió muchas cartas para su amor.", tr: "Ted aşkı için mektuplar yazdı." },
+                { t: "BTTF", es: "George escribía novelas en su cuarto.", tr: "George odasında romanlar yazardı." },
+                { t: "Breaking Bad", es: "Tü escribirás la fórmula exacta hoy.", tr: "Tam formülü bugün yazacaksın." }
+            ]
+        },
+        {
+            es: "Cerrar", tr: "Kapatmak",
+            tenses: [
+                { name: "Pres.", forms: ["cierro", "cierras", "cierra", "cerramos", "cerráis", "cierran"], tr: ["kapatırım", "kapatırsın", "kapatır", "kapatırız", "kapatırsınız", "kapatırlar"] },
+                { name: "Indef.", forms: ["cerré", "cerraste", "cerró", "cerramos", "cerrasteis", "cerraron"], tr: ["kapattım", "kapattın", "kapattı", "kapattık", "kapattınız", "kapattılar"] },
+                { name: "Imperf.", forms: ["cerraba", "cerrabas", "cerraba", "cerrábamos", "cerrabais", "cerraban"], tr: ["kapatırdım", "kapatırdın", "kapatırdı", "kapatırdık", "kapatırdınız", "kapatırlardı"] },
+                { name: "Futuro", forms: ["cerraré", "cerrarás", "cerrará", "cerraremos", "cerraréis", "cerrarán"], tr: ["kapatacağım", "kapatacaksın", "kapatacak", "kapatacağız", "kapatacaksınız", "kapatacaklar"] }
+            ],
+            ex: [
+                { t: "Bahar", es: "Yo cierro la puerta de mi pasado hoy.", tr: "Bugün geçmişimin kapısını kapatıyorum." },
+                { t: "Aşk-ı Memnu", es: "Behlül cerró la maleta and se fue.", tr: "Behlül valizi kapattı ve gitti." },
+                { t: "Severance", es: "Ellos cerraban la oficina a las cinco.", tr: "Ofislerini saat beşte kapatırlardı." },
+                { t: "Breaking Bad", es: "Tú cerrarás el laboratorio para siempre.", tr: "Laboratuvarı sonsuza dek kapatacaksın." }
+            ]
+        },
+        {
+            es: "Dar", tr: "Vermek",
+            tenses: [
+                { name: "Pres.", forms: ["doy", "das", "da", "damos", "dais", "dan"], tr: ["veririm", "verirsin", "verir", "veririz", "verirsiniz", "verirler"] },
+                { name: "Indef.", forms: ["di", "diste", "dio", "dimos", "disteis", "dieron"], tr: ["verdim", "verdin", "verdi", "verdik", "verdiniz", "verdiler"] },
+                { name: "Imperf.", forms: ["daba", "dabas", "daba", "dábamos", "dabais", "daban"], tr: ["verirdim", "verirdin", "verirdi", "verirdik", "verirdiniz", "verirlerdi"] },
+                { name: "Futuro", forms: ["daré", "darás", "dará", "daremos", "daréis", "darán"], tr: ["vereceğim", "vereceksin", "verecek", "vereceğiz", "vereceksiniz", "verecekler"] }
+            ],
+            ex: [
+                { t: "Bahar", es: "Yo le doy una oportunidad a la vida.", tr: "Hayata bir şans veriyorum." },
+                { t: "Aşk-ı Memnu", es: "Bihter le dio su corazón a Behlül.", tr: "Bihter kalbini Behlül'e verdi." },
+                { t: "Breaking Bad", es: "Gus le daba órdenes a Mike siempre.", tr: "Gus Mike'a her zaman emirler verirdi." },
+                { t: "HIMYM", es: "Barney nos dará un consejo genial.", tr: "Barney bize harika bir tavsiye verecek." }
+            ]
+        },
+        {
+            es: "Decir", tr: "Söylemek",
+            tenses: [
+                { name: "Pres.", forms: ["digo", "dices", "dice", "decimos", "decís", "dicen"], tr: ["derim", "dersin", "der", "deriz", "dersiniz", "derler"] },
+                { name: "Indef.", forms: ["dije", "dijiste", "dijo", "dijimos", "dijisteis", "dijeron"], tr: ["dedim", "dedin", "dedi", "dedik", "dediniz", "dediler"] },
+                { name: "Imperf.", forms: ["decía", "decías", "decía", "decíamos", "decíais", "decían"], tr: ["derdim", "derdin", "derdi", "derdik", "derdiniz", "derlerdi"] },
+                { name: "Futuro", forms: ["diré", "dirás", "dirá", "diremos", "diréis", "dirán"], tr: ["diyeceğim", "diyeceksin", "diyecek", "diyeceğiz", "diyeceksiniz", "diyecekler"] }
+            ],
+            ex: [
+                { t: "Breaking Bad", es: "Walt dice: Dí mi nombre ahora mismo.", tr: "Walt: Hemen şimdi adımı söyle diyor." },
+                { t: "Aşk-ı Memnu", es: "Bihter le dijo la verdad a Adnan.", tr: "Bihter Adnan'a gerçeği söyledi." },
+                { t: "HIMYM", es: "Ted decía que era el destino.", tr: "Ted bunun kader olduğunu söylerdi." },
+                { t: "Bahar", es: "Yo le diré todo a Timur mañana.", tr: "Yarın Timur'a her şeyi söyleyeceğim." }
+            ]
+        },
+        {
+            es: "Estar", tr: "Olmak / Bulunmak",
+            tenses: [
+                { name: "Pres.", forms: ["estoy", "estás", "está", "estamos", "estáis", "están"], tr: ["olurum", "olursun", "olur", "oluruz", "olursunuz", "olurlar"] },
+                { name: "Indef.", forms: ["estuve", "estuviste", "estuvo", "estuvimos", "estuvisteis", "estuvieron"], tr: ["oldum", "oldun", "oldu", "olduk", "oldunuz", "oldular"] },
+                { name: "Imperf.", forms: ["estaba", "estabas", "estaba", "estábamos", "estabais", "estaban"], tr: ["olurdum", "olurdun", "olurdu", "olurduk", "olurdunuz", "olurlardı"] },
+                { name: "Futuro", forms: ["estaré", "estarás", "estará", "estaremos", "estaréis", "estarán"], tr: ["olacağım", "olacaksın", "olacak", "olacağız", "olacaksınız", "olacaklar"] }
+            ],
+            ex: [
+                { t: "Bahar", es: "Yo estoy muy feliz con mi nueva vida.", tr: "Yeni hayatımla çok mutluyum." },
+                { t: "Aşk-ı Memnu", es: "Behlül estuvo en el jardín anoche.", tr: "Behlül dün gece bahçedeydi." },
+                { t: "Breaking Bad", es: "Jesse estaba muy asustado en el coche.", tr: "Jesse arabada çok korkmuştu/korkuyordu." },
+                { t: "Severance", es: "Tú estarás en la oficina todo el día.", tr: "Tüm gün ofiste olacaksın." }
+            ]
+        },
+        {
+            es: "Hacer", tr: "Yapmak",
+            tenses: [
+                { name: "Pres.", forms: ["hago", "haces", "hace", "hacemos", "hacéis", "hacen"], tr: ["yaparım", "yaparsın", "yapar", "yaparız", "yaparsınız", "yaparlar"] },
+                { name: "Indef.", forms: ["hice", "hiciste", "hizo", "hicimos", "hicisteis", "hicieron"], tr: ["yaptım", "yaptın", "yaptı", "yaptık", "yaptınız", "yaptılar"] },
+                { name: "Imperf.", forms: ["hacía", "hacías", "hacía", "hacíamos", "hacíais", "hacían"], tr: ["yapardım", "yapardın", "yapardı", "yapardık", "yapardınız", "yaparlardı"] },
+                { name: "Futuro", forms: ["haré", "harás", "hará", "haremos", "haréis", "harán"], tr: ["yapacağım", "yapacaksın", "yapacak", "yapacağız", "yapacaksınız", "yapacaklar"] }
+            ],
+            ex: [
+                { t: "Breaking Bad", es: "Walt hace un producto azul puro.", tr: "Walt saf mavi bir ürün yapıyor." },
+                { t: "Aşk-ı Memnu", es: "Bihter le hizo una broma a Adnan.", tr: "Bihter, Adnan'a bir şaka yaptı." },
+                { t: "HIMYM", es: "Marshall hacía mucha comida los domingos.", tr: "Marshall pazar günleri çok yemek yapardı." },
+                { t: "Bahar", es: "Yo haré lo mejor para mis hijos.", tr: "Çocuklarım için en iyisini yapacağım." }
+            ]
+        },
+        {
+            es: "Ir", tr: "Gitmek",
+            tenses: [
+                { name: "Pres.", forms: ["voy", "vas", "va", "vamos", "vais", "van"], tr: ["giderim", "gidersin", "gider", "gideriz", "gidersiniz", "giderler"] },
+                { name: "Indef.", forms: ["fui", "fuiste", "fue", "fuimos", "fuisteis", "fueron"], tr: ["gittim", "gittin", "gitti", "gittik", "gittiniz", "gittiler"] },
+                { name: "Imperf.", forms: ["iba", "ibas", "iba", "íbamos", "ibais", "iban"], tr: ["giderdim", "giderdin", "giderdi", "giderdik", "giderdiniz", "giderlerdi"] },
+                { name: "Futuro", forms: ["iré", "irás", "irá", "iremos", "iréis", "irán"], tr: ["gideceğim", "gideceksin", "gidecek", "gideceğiz", "gideceksiniz", "gidecekler"] }
+            ],
+            ex: [
+                { t: "Bahar", es: "Yo voy al hospital muy temprano.", tr: "Hastaneye çok erken gidiyorum." },
+                { t: "Aşk-ı Memnu", es: "Bihter fue a la casa de piedra.", tr: "Bihter taş eve gitti." },
+                { t: "HIMYM", es: "Nosotros íbamos al bar cada noche.", tr: "Her gece bara giderdik." },
+                { t: "BTTF", es: "Marty irá al futuro pronto.", tr: "Marty yakında geleceğe gidecek." }
+            ]
+        },
+        {
+            es: "Leer", tr: "Okumak",
+            tenses: [
+                { name: "Pres.", forms: ["leo", "lees", "lee", "leemos", "leéis", "leen"], tr: ["okurum", "okursun", "okur", "okuruz", "okursunuz", "okurlar"] },
+                { name: "Indef.", forms: ["leí", "leíste", "leyó", "leímos", "leísteis", "leyeron"], tr: ["okudum", "okudun", "okudu", "okuduk", "okudunuz", "okudular"] },
+                { name: "Imperf.", forms: ["leía", "leías", "leía", "leíamos", "leíais", "leían"], tr: ["okurdum", "okurdun", "okurdu", "okurduk", "okurdunuz", "okurlardı"] },
+                { name: "Futuro", forms: ["leeré", "leerás", "leerá", "leeremos", "leeréis", "leerán"], tr: ["okuyacağım", "okuyacaksın", "okuyacak", "okuyacağız", "okuyacaksınız", "okuyacaklar"] }
+            ],
+            ex: [
+                { t: "Aşk-ı Memnu", es: "Nihal lee libros franceses.", tr: "Nihal Fransızca kitaplar okuyor." },
+                { t: "Bahar", es: "Bahar leí un informe médico ayer.", tr: "Bahar dün tıbbi bir rapor okudu." },
+                { t: "Breaking Bad", es: "Gale leía mucha poesía en su casa.", tr: "Gale evinde çok şiir okurdu." },
+                { t: "HIMYM", es: "Tú leerás mi blog algún día.", tr: "Bir gün bloğumu okuyacaksın." }
+            ]
+        },
+        {
+            es: "Poder", tr: "Ebilmek / Gücü Yetmek",
+            tenses: [
+                { name: "Pres.", forms: ["puedo", "puedes", "puede", "podemos", "podéis", "pueden"], tr: ["yapabilirim", "yapabilirsin", "yapabilir", "yapabiliriz", "yapabilirsiniz", "yapabilirler"] },
+                { name: "Indef.", forms: ["pude", "pudiste", "pudo", "pudimos", "pudisteis", "pudieron"], tr: ["yapabildim", "yapabildin", "yapabildi", "yapabildik", "yapabildiniz", "yapabildiler"] },
+                { name: "Imperf.", forms: ["podía", "podías", "podía", "podíamos", "podíais", "podían"], tr: ["yapabilirdim", "yapabilirdin", "yapabilirdi", "yapabilirdik", "yapabilirdiniz", "yapabilirlerdi"] },
+                { name: "Futuro", forms: ["podré", "podrás", "podrá", "podremos", "podréis", "podrán"], tr: ["yapabileceğim", "yapabileceksin", "yapabilecek", "yapabileceğiz", "yapabileceksiniz", "yapabilecekler"] }
+            ],
+            ex: [
+                { t: "Bahar", es: "Yo puedo ser una gran cirujana.", tr: "Harika bir cerrah olabilirim." },
+                { t: "Aşk-ı Memnu", es: "Behlül no pudo escapar de Bihter.", tr: "Behlül, Bihter'den kaçamadı." },
+                { t: "Breaking Bad", es: "Él podía ganar millones de dólares.", tr: "Milyonlarca dolar kazanabiliyordu." },
+                { t: "Severance", es: "Ustedes podrán salir de aquí pronto.", tr: "Yakında buradan çıkabileceksiniz." }
+            ]
+        },
+        {
+            es: "Poner", tr: "Koymak",
+            tenses: [
+                { name: "Pres.", forms: ["pongo", "pones", "pone", "ponemos", "ponéis", "ponen"], tr: ["koyarım", "koyarsın", "koyar", "koyarız", "koyarsınız", "koyarlar"] },
+                { name: "Indef.", forms: ["puse", "pusiste", "puso", "pusimos", "pusisteis", "pusieron"], tr: ["koydum", "koydun", "koydu", "koyduk", "koydunuz", "koydular"] },
+                { name: "Imperf.", forms: ["ponía", "ponías", "ponía", "poníamos", "poníais", "ponían"], tr: ["koyardım", "koyardın", "koyardı", "koyardık", "koyardınız", "koyarlardı"] },
+                { name: "Futuro", forms: ["pondré", "pondrás", "pondrá", "pondremos", "pondréis", "pondrán"], tr: ["koyacağım", "koyacaksın", "koyacak", "koyacağız", "koyacaksınız", "koyacaklar"] }
+            ],
+            ex: [
+                { t: "Aşk-ı Memnu", es: "Bihter se pone su vestido rojo.", tr: "Bihter kırmızı elbisesini giyiyor (üstüne koyuyor)." },
+                { t: "Breaking Bad", es: "Walt puso el dinero en el desierto.", tr: "Walt parayı çöle koydu." },
+                { t: "HIMYM", es: "Barney se ponía un traje cada día.", tr: "Barney her gün takım elbise giyerdi (üstüne koyardı)." },
+                { t: "Bahar", es: "Yo pondré fin a este matrimonio.", tr: "Bu evliliğe son koyacağım (noktalayacağım)." }
+            ]
+        },
+        {
+            es: "Querer", tr: "İstemek / Sevmek",
+            tenses: [
+                { name: "Pres.", forms: ["quiero", "quieras", "quiere", "queremos", "queréis", "quieren"], tr: ["isterim", "istersin", "ister", "isteriz", "istersiniz", "isterler"] },
+                { name: "Indef.", forms: ["quise", "quisiste", "quiso", "quisimos", "quisisteis", "quisieron"], tr: ["istedim", "istedin", "istedi", "istedik", "istediniz", "istediler"] },
+                { name: "Imperf.", forms: ["quería", "querías", "quería", "queríamos", "queríais", "querían"], tr: ["isterdim", "isterdin", "isterdi", "isterdik", "isterdiniz", "isterlerdi"] },
+                { name: "Futuro", forms: ["querré", "querrás", "querrá", "querremos", "querréis", "querrán"], tr: ["isteyeceğim", "isteyeceksin", "isteyecek", "isteyeceğiz", "isteyeceksiniz", "isteyecekler"] }
+            ],
+            ex: [
+                { t: "Aşk-ı Memnu", es: "Bihter quiere a Behlül desesperadamente.", tr: "Bihter umutsuzca Behlül'ü seviyor/istiyor." },
+                { t: "Bahar", es: "Yo siempre quise ser una buena doctora.", tr: "Ben her zaman iyi bir doktor olmak istedim." },
+                { t: "Breaking Bad", es: "Skyler quería proteger a su familia.", tr: "Skyler ailesini korumak isterdi/istiyordu." },
+                { t: "HIMYM", es: "Tú querrás conocer a la madre pronto.", tr: "Yakında anneyle tanışmak isteyeceksin." }
+            ]
+        },
+        {
+            es: "Saber", tr: "Bilmek",
+            tenses: [
+                { name: "Pres.", forms: ["sé", "sabes", "sabe", "sabemos", "sabéis", "saben"], tr: ["bilirim", "bilirsin", "bilir", "biliriz", "bilirsiniz", "bilirler"] },
+                { name: "Indef.", forms: ["supe", "supiste", "supo", "supimos", "supisteis", "supieron"], tr: ["bildim/öğrendim", "bildin", "bildi", "bildik", "bildiniz", "bildiler"] },
+                { name: "Imperf.", forms: ["sabía", "sabías", "sabía", "sabíamos", "sabíais", "sabían"], tr: ["bilirdim", "bilirdin", "bilirdi", "bilirdik", "bilirdiniz", "bilirlerdi"] },
+                { name: "Futuro", forms: ["sabré", "sabrás", "sabrá", "sabremos", "sabréis", "sabrán"], tr: ["bileceğim", "bileceksin", "bilecek", "bileceğiz", "bileceksiniz", "bilecekler"] }
+            ],
+            ex: [
+                { t: "Breaking Bad", es: "Yo sé que tú eres el peligro.", tr: "Tehlikenin sen olduğunu biliyorum." },
+                { t: "Aşk-ı Memnu", es: "Matmazel supo el secreto de la casa.", tr: "Matmazel evin sırrını öğrendi/bildi." },
+                { t: "Severance", es: "Ellos no sabían nada sobre sus vidas.", tr: "Hayatları hakkında hiçbir şey bilmezlerdi/bilmiyorlardı." },
+                { t: "Bahar", es: "Timur sabrá la verdad mañana.", tr: "Timur yarın gerçeği bilecek." }
+            ]
+        },
+        {
+            es: "Salir", tr: "Çıkmak",
+            tenses: [
+                { name: "Pres.", forms: ["salgo", "sales", "sale", "salimos", "salís", "salen"], tr: ["çıkarım", "çıkarsın", "çıkar", "çıkarız", "çıkarsınız", "çıkarlar"] },
+                { name: "Indef.", forms: ["salí", "saliste", "salió", "salimos", "salisteis", "salieron"], tr: ["çıktım", "çıktın", "çıktı", "çıktık", "çıktınız", "çıktılar"] },
+                { name: "Imperf.", forms: ["salía", "salías", "salía", "salíamos", "salíais", "salían"], tr: ["çıkardım", "çıkardın", "çıkardı", "çıkardık", "çıkardınız", "çıkarlardı"] },
+                { name: "Futuro", forms: ["saldré", "saldrás", "saldrá", "saldremos", "saldréis", "saldrán"], tr: ["çıkacağım", "çıkacaksın", "çıkacak", "çıkacağız", "çıkacaksınız", "çıkacaklar"] }
+            ],
+            ex: [
+                { t: "Aşk-ı Memnu", es: "Behlül sale de la mansión en secreto.", tr: "Behlül yalıdan gizlice çıkıyor." },
+                { t: "Bahar", es: "Bahar salió del quirófano con éxito.", tr: "Bahar ameliyathaneden başarıyla çıktı." },
+                { t: "HIMYM", es: "Ted salía con muchas chicas diferentes.", tr: "Ted birçok farklı kızla çıkardı." },
+                { t: "Severance", es: "Tú saldrás de Lumon a las cinco.", tr: "Lumon'dan saat beşte çıkacaksın." }
+            ]
+        },
+        {
+            es: "Ser", tr: "Olmak (Kalıcı Özellik)",
+            tenses: [
+                { name: "Pres.", forms: ["soy", "eres", "es", "somos", "sois", "son"], tr: ["olurum/uyum", "olursun/sun", "olur/dur", "oluruz/uz", "olursunuz/sunuz", "olurlar/dır"] },
+                { name: "Indef.", forms: ["fui", "fuiste", "fue", "fuimos", "fuisteis", "fueron"], tr: ["oldum/idim", "oldun", "oldu", "olduk", "oldunuz", "oldular"] },
+                { name: "Imperf.", forms: ["era", "eras", "era", "éramos", "erais", "eran"], tr: ["olurdum/idim", "olurdun", "olurdu", "olurduk", "olurdunuz", "olurlardı"] },
+                { name: "Futuro", forms: ["seré", "serás", "será", "seremos", "seréis", "serán"], tr: ["olacağım", "olacaksın", "olacak", "olacağız", "olacaksınız", "olacaklar"] }
+            ],
+            ex: [
+                { t: "Breaking Bad", es: "Yo soy el que llama a la puerta.", tr: "Kapıyı çalan benim." },
+                { t: "Aşk-ı Memnu", es: "Adnan fue un hombre muy paciente.", tr: "Adnan çok sabırlı bir adamdı." },
+                { t: "BTTF", es: "George era una persona muy tímida.", tr: "George çok utangaç bir insandı." },
+                { t: "Bahar", es: "Tú serás la mejor cirujana del país.", tr: "Sen ülkenin en iyi cerrahı olacaksın." }
+            ]
+        },
+        {
+            es: "Tener", tr: "Sahip Olmak",
+            tenses: [
+                { name: "Pres.", forms: ["tengo", "tienes", "tiene", "tenemos", "tenéis", "tienen"], tr: ["sahibim", "sahipsin", "sahip", "sahibiz", "sahipsiniz", "sahipler"] },
+                { name: "Indef.", forms: ["tuve", "tuviste", "tuvo", "tuvimos", "tuvisteis", "tuvieron"], tr: ["sahip oldum", "sahip oldun", "sahip oldu", "sahip olduk", "sahip oldunuz", "sahip oldular"] },
+                { name: "Imperf.", forms: ["tenía", "tenías", "tenía", "teníamos", "teníais", "tenían"], tr: ["sahiptim", "sahiptin", "sahipti", "sahiptik", "sahiptiniz", "sahiptiler"] },
+                { name: "Futuro", forms: ["tendré", "tendrás", "tendrá", "tendremos", "tendréis", "tendrán"], tr: ["sahip olacağım", "sahip olacaksın", "sahip olacak", "sahip olacağız", "sahip olacaksınız", "sahip olacaklar"] }
+            ],
+            ex: [
+                { t: "Bahar", es: "Yo tengo mucha esperanza hoy.", tr: "Bugün çok umudum var." },
+                { t: "Aşk-ı Memnu", es: "Behlül tuvo miedo de la verdad.", tr: "Behlül gerçekten korktu." },
+                { t: "Breaking Bad", es: "Walter tenía un plan para el dinero.", tr: "Walter'ın para için bir planı vardı." },
+                { t: "HIMYM", es: "Ustedes tendrán una gran historia.", tr: "Harika bir hikayeniz olacak." }
+            ]
+        },
+        {
+            es: "Venir", tr: "Gelmek",
+            tenses: [
+                { name: "Pres.", forms: ["vengo", "vienes", "viene", "venimos", "venís", "vienen"], tr: ["gelirim", "gelirsin", "gelir", "geliriz", "gelirsiniz", "gelirler"] },
+                { name: "Indef.", forms: ["vine", "viniste", "vino", "vinimos", "vinisteis", "vinieron"], tr: ["geldim", "geldin", "geldi", "geldik", "geldiniz", "geldiler"] },
+                { name: "Imperf.", forms: ["venía", "venías", "venía", "veníamos", "veníais", "venían"], tr: ["gelirdim", "gelirdin", "gelirdi", "gelirdik", "gelirdiniz", "gelirlerdi"] },
+                { name: "Futuro", forms: ["vendré", "vendrás", "vendrá", "vendremos", "vendréis", "vendrán"], tr: ["geleceğim", "geleceksin", "gelecek", "geleceğiz", "geleceksiniz", "gelecekler"] }
+            ],
+            ex: [
+                { t: "Aşk-ı Memnu", es: "Behlül viene a la mansión a veces.", tr: "Behlül yalıya bazen geliyor." },
+                { t: "Bahar", es: "Mi madre vino al hospital para verme.", tr: "Annem beni görmek için hastaneye geldi." },
+                { t: "Breaking Bad", es: "Ellos venían a la lavandería cada día.", tr: "Her gün çamaşırhaneye gelirlerdi." },
+                { t: "HIMYM", es: "Tú vendrás a la fiesta con nosotros.", tr: "Bizimle partiye geleceksin." }
+            ]
+        },
+        {
+            es: "Ver", tr: "Görmek / Bakmak",
+            tenses: [
+                { name: "Pres.", forms: ["veo", "ves", "ve", "vemos", "veis", "ven"], tr: ["görürüm", "görürsün", "görür", "görürüz", "görürsünüz", "görürler"] },
+                { name: "Indef.", forms: ["vi", "viste", "vio", "vimos", "visteis", "vieron"], tr: ["gördüm", "gördün", "gördü", "gördük", "gördünüz", "gördüler"] },
+                { name: "Imperf.", forms: ["veía", "veías", "veía", "veíamos", "veíais", "veían"], tr: ["görürdüm", "görürdün", "görürdü", "görürdük", "görürdünüz", "görürlerdi"] },
+                { name: "Futuro", forms: ["veré", "verás", "verá", "veremos", "veréis", "verán"], tr: ["göreceğim", "göreceksin", "görececek", "görececeğiz", "göreceksiniz", "görececekler"] }
+            ],
+            ex: [
+                { t: "Bahar", es: "Yo veo mi futuro en este hospital.", tr: "Geleceğimi bu hastanede görüyorum." },
+                { t: "Aşk-ı Memnu", es: "Behlül vio a Bihter en el bosque.", tr: "Behlül, Bihter'i ormanda gördü." },
+                { t: "Breaking Bad", es: "Gus veía todo en su oficina.", tr: "Gus ofisinde her şeyi görürdü/izlerdi." },
+                { t: "Severance", es: "Tú verás la luz al final del túnel.", tr: "Tünelin sonundaki ışığı göreceksin." }
+            ]
+        },
+        {
+            es: "Volver", tr: "Dönmek",
+            tenses: [
+                { name: "Pres.", forms: ["vuelvo", "vuelves", "vuelve", "volvemos", "volvéis", "vuelven"], tr: ["dönerim", "dönersin", "döner", "döneriz", "dönersiniz", "dönerler"] },
+                { name: "Indef.", forms: ["volví", "volviste", "volvió", "volvimos", "volvisteis", "volvieron"], tr: ["döndüm", "döndün", "döndü", "döndük", "döndünüz", "döndüler"] },
+                { name: "Imperf.", forms: ["volvía", "volvías", "volvía", "volvíamos", "volvíais", "volvían"], tr: ["dönerdim", "dönerdin", "dönerdi", "dönerdik", "dönerdiniz", "dönerlerdi"] },
+                { name: "Futuro", forms: ["volveré", "volverás", "volverá", "volveremos", "volveréis", "volverán"], tr: ["döneceğim", "döneceksin", "dönecek", "döneceğiz", "döneceksiniz", "dönecekler"] }
+            ],
+            ex: [
+                { t: "Aşk-ı Memnu", es: "Behlül siempre vuelve a la mansión.", tr: "Behlül her zaman yalıya döner." },
+                { t: "Bahar", es: "Bahar volvió a la medicina después de años.", tr: "Bahar yıllar sonra tıba döndü." },
+                { t: "BTTF", es: "Marty volvía al pasado con el coche.", tr: "Marty arabayla geçmişe dönerdi." },
+                { t: "Breaking Bad", es: "Tú volverás a casa con el dinero.", tr: "Eve parayla döneceksin." }
+            ]
+        },
+        {
+            es: "Pensar", tr: "Düşünmek",
+            tenses: [
+                { name: "Pres.", forms: ["pienso", "piensas", "piensa", "pensamos", "pensáis", "piensan"], tr: ["düşünürüm", "düşünürsün", "düşünür", "düşünürüz", "düşünürsünüz", "düşünürler"] },
+                { name: "Indef.", forms: ["pensé", "pensaste", "pensó", "pensamos", "pensasteis", "pensaron"], tr: ["düşündüm", "düşündün", "düşündü", "düşündük", "düşündünüz", "düşündüler"] },
+                { name: "Imperf.", forms: ["pensaba", "pensabas", "pensaba", "pensábamos", "pensabais", "pensaban"], tr: ["düşünürdüm", "düşünürdün", "düşünürdü", "düşünürdük", "düşünürdiniz", "düşünürlerdi"] },
+                { name: "Futuro", forms: ["pensaré", "pensarás", "pensará", "pensaremos", "pensaréis", "pensarán"], tr: ["düşüneceğim", "düşüneceksin", "düşünecek", "düşüneceğiz", "düşüneceksiniz", "düşünecekler"] }
+            ],
+            ex: [
+                { t: "Bahar", es: "Yo pienso que merezco ser feliz.", tr: "Mutlu olmayı hak ettiğimi düşünüyorum." },
+                { t: "Aşk-ı Memnu", es: "Adnan pensó que Bihter era fiel.", tr: "Adnan, Bihter'in sadık olduğunu düşündü." },
+                { t: "HIMYM", es: "Ted pensaba en el destino constantemente.", tr: "Ted sürekli kaderi düşünürdü." },
+                { t: "Breaking Bad", es: "Tú pensarás en un plan mejor mañana.", tr: "Yarın daha iyi bir plan düşüneceksin." }
+            ]
+        },
+        {
+            es: "Dormir", tr: "Uyumak",
+            tenses: [
+                { name: "Pres.", forms: ["duermo", "duermes", "duerme", "dormimos", "dormís", "duermen"], tr: ["uyurum", "uyursun", "uyur", "uyuruz", "uyursunuz", "uyurlar"] },
+                { name: "Indef.", forms: ["dormí", "dormiste", "durmió", "dormimos", "dormisteis", "durmieron"], tr: ["uyudum", "uyudun", "uyudu", "uyuduk", "uyudunuz", "uyudular"] },
+                { name: "Imperf.", forms: ["dormía", "dormías", "dormía", "dormíamos", "dormíais", "dormían"], tr: ["uyurdum", "uyurdun", "uyurdu", "uyurduk", "uyurdunuz", "uyurlardı"] },
+                { name: "Futuro", forms: ["dormiré", "dormirás", "dormirá", "dormiremos", "dormiréis", "dormirán"], tr: ["uyuyacağım", "uyuyacaksın", "uyuyacak", "uyuyacağız", "uyuyacaksınız", "uyuyacaklar"] }
+            ],
+            ex: [
+                { t: "Aşk-ı Memnu", es: "Nihal duerme con su osito de peluche.", tr: "Nihal oyuncak ayısıyla uyuyor." },
+                { t: "Bahar", es: "Bahar dormí muy poco anoche.", tr: "Bahar dün gece çok az uyudu." },
+                { t: "Breaking Bad", es: "Walt no dormía por el estrés.", tr: "Walt stresten uyuyamazdı/uyumazdı." },
+                { t: "HIMYM", es: "Nosotros dormiremos en el tren.", tr: "Trende uyuyacağız." }
+            ]
+        },
+        {
+            es: "Pedir", tr: "İstemek / Rica Etmek",
+            tenses: [
+                { name: "Pres.", forms: ["pido", "pides", "pide", "pedimos", "pedís", "piden"], tr: ["isterim", "istersin", "ister", "isteriz", "istersiniz", "isterler"] },
+                { name: "Indef.", forms: ["pedí", "pediste", "pidió", "pedimos", "pedisteis", "pidieron"], tr: ["istedim", "istedin", "istedi", "istedik", "istediniz", "istediler"] },
+                { name: "Imperf.", forms: ["pedía", "pedías", "pedía", "pedíamos", "pedíais", "pedían"], tr: ["isterdim", "isterdin", "isterdi", "isterdik", "isterdiniz", "isterlerdi"] },
+                { name: "Futuro", forms: ["pediré", "pedirás", "pedirá", "pediremos", "pediréis", "pedirán"], tr: ["isteyeceğim", "isteyeceksin", "isteyecek", "isteyeceğiz", "isteyeceksiniz", "isteyecekler"] }
+            ],
+            ex: [
+                { t: "Bahar", es: "Yo pido el divorcio a Timur.", tr: "Timur'dan boşanmayı istiyorum." },
+                { t: "Aşk-ı Memnu", es: "Behlül le pidió perdón a Adnan.", tr: "Behlül, Adnan'dan özür diledi (istedi)." },
+                { t: "Breaking Bad", es: "Jesse pedía ayuda a Walt a veces.", tr: "Jesse bazen Walt'tan yardım isterdi." },
+                { t: "HIMYM", es: "Tú pedirás una pizza para nosotros.", tr: "Bizim için bir pizza isteyeceksin." }
+            ]
+        },
+        {
+            es: "Sentir", tr: "Hissermek / Üzülmek",
+            tenses: [
+                { name: "Pres.", forms: ["siento", "sientes", "siente", "sentimos", "sentís", "sienten"], tr: ["hissederim", "hissedersin", "hisseder", "hissederiz", "hissedersiniz", "hissederler"] },
+                { name: "Indef.", forms: ["sentí", "sentiste", "sintió", "sentimos", "sentisteis", "sintieron"], tr: ["hissettim", "hissettin", "hissetti", "hissettik", "hissettiniz", "hissettiler"] },
+                { name: "Imperf.", forms: ["sentía", "sentías", "sentía", "sentíamos", "sentíais", "sentían"], tr: ["hissederdim", "hissederdin", "hissederdi", "hissederdik", "hissederdiniz", "hissederlerdi"] },
+                { name: "Futuro", forms: ["sentiré", "sentirás", "sentirá", "sentiremos", "sentiréis", "sentirán"], tr: ["hissedeceğim", "hissedeceksin", "hissedecek", "hissedeceğiz", "hissedeceksiniz", "hissedecekler"] }
+            ],
+            ex: [
+                { t: "Aşk-ı Memnu", es: "Bihter siente una gran pasión.", tr: "Bihter büyük bir tutku hissediyor." },
+                { t: "Bahar", es: "Yo sentí un dolor muy fuerte ayer.", tr: "Dün çok güçlü bir acı hissettim." },
+                { t: "Breaking Bad", es: "Skyler sentía que algo estaba mal.", tr: "Skyler bir şeylerin yanlış olduğunu hissederdi." },
+                { t: "Severance", es: "Tú no sentirás nada después del proceso.", tr: "İşlemden sonra hiçbir şey hissetmeyeceksin." }
+            ]
+        }
+    ];
+
+    let currentIdx = 0;
+
+    function renderCard(idx) {
+        currentIdx = idx;
+        const verb = verbs[idx];
+        const container = document.getElementById('flashcard-container');
+        
+        let tableRows = verb.tenses.map(tense => `
+            <tr>
+                <td class="tense-name">${tense.name}</td>
+                ${tense.forms.map((f, i) => `<td><span class="verb-form">${f}</span><span class="tr-form">${tense.tr[i]}</span></td>`).join('')}
+            </tr>
+        `).join('');
+
+        const html = `
+            <div class="card">
+                <div class="card-header">
+                    <h2>${verb.es}</h2>
+                    <span>(${verb.tr})</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <tr><th>Zaman</th><th>Yo</th><th>Tú</th><th>Él</th><th>Nos.</th><th>Vos.</th><th>Ellos</th></tr>
+                        ${tableRows}
+                    </table>
+                </div>
+                <div class="examples-grid">
+                    ${verb.ex.map(e => `
+                        <div class="ex-item">
+                            <span class="theme-tag">${e.t}</span>
+                            <span class="ex-es">${e.es}</span>
+                            <span class="ex-tr">${e.tr}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        container.innerHTML = html;
+        document.getElementById('counter').innerText = `${idx + 1} / ${verbs.length}`;
+        document.getElementById('prevBtn').disabled = idx === 0;
+        document.getElementById('nextBtn').disabled = idx === verbs.length - 1;
+        container.children[0].scrollTop = 0;
+    }
+
+    function changeCard(dir) {
+        // Haptic feedback simulation
+        if (window.navigator.vibrate) window.navigator.vibrate(10);
+        
+        currentIdx += dir;
+        renderCard(currentIdx);
+    }
+
+    function searchVerb() {
+        const query = document.getElementById('verbSearch').value.toLowerCase();
+        if(!query) return;
+        const foundIdx = verbs.findIndex(v => v.es.toLowerCase().includes(query) || v.tr.toLowerCase().includes(query));
+        if (foundIdx !== -1) renderCard(foundIdx);
+    }
+
+    renderCard(0);
+</script>
+</body>
+</html>
