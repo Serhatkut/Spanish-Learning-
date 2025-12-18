@@ -8,57 +8,49 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="İspanyolca">
     
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/197/197593.png">
+    
     <title>Spanish Flashcards</title>
 
     <style>
         :root {
-            --primary: #1c1c1e;    /* iOS Dark Gray */
-            --secondary: #3a3a3c;  /* iOS Elevated Gray */
-            --accent: #ff9500;     /* iOS Orange */
-            --blue: #007aff;       /* iOS System Blue */
-            --red: #ff3b30;        /* iOS System Red */
-            --bg: #f2f2f7;         /* iOS System Background */
+            --primary: #1c1c1e;
+            --accent: #ff9500;
+            --blue: #007aff;
+            --bg: #f2f2f7;
             --card-bg: #ffffff;
         }
 
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
             background-color: var(--bg); 
             margin: 0; padding: 0; 
             display: flex; flex-direction: column; 
-            height: 100vh; 
+            height: 100vh; width: 100vw;
             overflow: hidden;
-            /* Prevents blue highlight on tap */
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Fixed iOS Style Header */
+        /* Arama Çubuğu */
         .search-container {
             background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px;
             border-bottom: 0.5px solid #c6c6c8;
             z-index: 100;
         }
 
         #verbSearch {
-            width: 100%;
-            padding: 10px 12px;
-            border-radius: 10px;
-            border: none;
-            background: #e3e3e6;
-            font-size: 17px; /* iOS standard size to prevent zoom */
-            outline: none;
-            box-sizing: border-box;
+            width: 100%; padding: 12px; border-radius: 10px; border: none;
+            background: #e3e3e6; font-size: 17px; outline: none; box-sizing: border-box;
         }
 
-        /* Card Area */
+        /* Kart Alanı - iPhone'da sıkışmayı önleyen padding */
         #flashcard-container {
             flex-grow: 1;
             display: flex;
             justify-content: center;
-            padding: 15px;
+            padding: 10px 8px; /* Yanlardan biraz boşluk */
             overflow: hidden;
         }
 
@@ -74,63 +66,47 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        .card-header { 
-            background-color: white; 
-            padding: 20px 15px 10px 15px; 
-            text-align: center;
-            border-bottom: 0.5px solid #eee;
-        }
-        .card-header h2 { margin: 0; font-size: 28px; font-weight: 700; color: var(--primary); }
+        .card-header { padding: 20px 15px 10px 15px; text-align: center; border-bottom: 0.5px solid #eee; }
+        .card-header h2 { margin: 0; font-size: 26px; font-weight: 700; color: var(--primary); }
         .card-header span { font-size: 16px; color: #8e8e93; }
 
-        /* Table Design */
-        .table-wrapper { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 400px; }
-        th, td { border: 0.5px solid #f2f2f7; padding: 10px 2px; text-align: center; }
+        /* TABLO SIKIŞMA ÇÖZÜMÜ: Yatay Kaydırma */
+        .table-wrapper { 
+            width: 100%; 
+            overflow-x: auto; /* Tablo sığmazsa sağa kaysın */
+            -webkit-overflow-scrolling: touch;
+            border-bottom: 0.5px solid #f2f2f7;
+        }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            min-width: 480px; /* Tablonun harfler birbirine girmemesi için minimum genişliği */
+        }
+
+        th, td { border: 0.5px solid #f2f2f7; padding: 10px 4px; text-align: center; }
         th { background: #fafafa; font-size: 11px; color: #8e8e93; text-transform: uppercase; }
         
-        .tense-name { background-color: #fff9f2; font-weight: 700; font-size: 10px; color: var(--accent); width: 65px; }
+        .tense-name { background-color: #fff9f2; font-weight: 700; font-size: 10px; color: var(--accent); width: 60px; }
         .verb-form { font-size: 13px; font-weight: 600; color: var(--primary); display: block; }
         .tr-form { font-size: 10px; color: #aeaeb2; display: block; margin-top: 2px; }
 
-        /* Examples Grid */
-        .examples-grid { 
-            display: grid; 
-            grid-template-columns: 1fr; 
-            background: white;
-        }
-        .ex-item { 
-            padding: 15px; 
-            border-bottom: 0.5px solid #f2f2f7;
-            border-left: 4px solid var(--blue);
-        }
+        /* Örnekler */
+        .ex-item { padding: 15px; border-bottom: 0.5px solid #f2f2f7; border-left: 5px solid var(--blue); }
         .theme-tag { font-size: 10px; color: var(--blue); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; display: block; }
-        .ex-es { font-weight: 500; color: var(--primary); display: block; font-size: 15px; line-height: 1.3; margin-bottom: 4px; }
-        .ex-tr { color: #636366; font-style: italic; display: block; font-size: 13px; }
+        .ex-es { font-weight: 500; color: var(--primary); display: block; font-size: 16px; line-height: 1.3; margin-bottom: 4px; }
+        .ex-tr { color: #636366; font-style: italic; display: block; font-size: 14px; }
 
-        /* Tab Bar Style Navigation */
+        /* Alt Gezinme Barı */
         .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; justify-content: space-between; align-items: center;
             padding: 10px 25px calc(env(safe-area-inset-bottom) + 10px) 25px;
             background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border-top: 0.5px solid #c6c6c8;
         }
 
-        button {
-            background: none;
-            color: var(--blue);
-            border: none;
-            padding: 10px;
-            font-weight: 600;
-            font-size: 17px;
-            cursor: pointer;
-        }
-
-        button:active { opacity: 0.5; }
+        button { background: none; color: var(--blue); border: none; padding: 10px; font-weight: 600; font-size: 18px; cursor: pointer; }
         button:disabled { color: #d1d1d6; }
         #counter { font-weight: 500; color: #8e8e93; font-size: 14px; }
     </style>
@@ -138,7 +114,7 @@
 <body>
 
 <div class="search-container">
-    <input type="text" id="verbSearch" placeholder="Fiil ara..." oninput="searchVerb()">
+    <input type="text" id="verbSearch" placeholder="Fiil ara (İspanyolca/Türkçe)..." oninput="searchVerb()">
 </div>
 
 <div id="flashcard-container"></div>
@@ -150,7 +126,9 @@
 </div>
 
 <script>
-    const verbs = [
+    // Buraya önceki mesajlardaki "const verbs = [...]" listesini kopyalayıp yapıştır.
+    // Eğer liste elinde yoksa belirt, tekrar göndereyim.
+   const verbs = [
         {
             es: "Trabajar", tr: "Çalışmak",
             tenses: [
@@ -558,9 +536,6 @@
     }
 
     function changeCard(dir) {
-        // Haptic feedback simulation
-        if (window.navigator.vibrate) window.navigator.vibrate(10);
-        
         currentIdx += dir;
         renderCard(currentIdx);
     }
