@@ -3,235 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="İspanyolca">
-    
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/197/197593.png">
-    
-    <title>Spanish Flashcards</title>
-
+    <title>İspanyolca Kartlar</title>
     <style>
         :root {
-            --primary: #1c1c1e;
-            --accent: #ff9500;
-            --blue: #007aff;
-            --bg: #f2f2f7;
-            --card-bg: #ffffff;
+            --bg: #F2F2F7;
+            --card: #FFFFFF;
+            --accent: #007AFF;
+            --text: #1C1C1E;
+            --gray: #8E8E93;
         }
 
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            background-color: var(--bg); 
-            margin: 0; padding: 0; 
-            display: flex; flex-direction: column; 
-            height: 100vh; width: 100vw;
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
             overflow: hidden;
-            -webkit-tap-highlight-color: transparent;
+            color: var(--text);
         }
 
-        /* Arama Çubuğu */
-        .search-container {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px;
-            border-bottom: 0.5px solid #c6c6c8;
-            z-index: 100;
+        /* Arama Alanı */
+        header {
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(20px);
+            padding: calc(env(safe-area-inset-top) + 10px) 15px 15px;
+            border-bottom: 0.5px solid #C6C6C8;
+        }
+
+        .search-box {
+            background: #E3E3E6;
+            border-radius: 12px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
         }
 
         #verbSearch {
-            width: 100%; padding: 12px; border-radius: 10px; border: none;
-            background: #e3e3e6; font-size: 17px; outline: none; box-sizing: border-box;
+            border: none; background: none; width: 100%; font-size: 17px; outline: none;
         }
 
-        /* Kart Alanı - iPhone'da sıkışmayı önleyen padding */
-        #flashcard-container {
-            flex-grow: 1;
+        /* Kart Alanı */
+        main {
+            flex: 1;
             display: flex;
+            align-items: center;
             justify-content: center;
-            padding: 10px 8px; /* Yanlardan biraz boşluk */
-            overflow: hidden;
+            padding: 20px;
         }
 
-        .card {
+        .flashcard {
+            background: var(--card);
             width: 100%;
-            max-width: 500px;
-            background: var(--card-bg);
-            border-radius: 20px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            max-width: 400px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+
+        .verb-title { font-size: 34px; font-weight: 800; margin: 0; }
+        .verb-tr { font-size: 18px; color: var(--gray); margin-bottom: 20px; }
+
+        /* Zaman Seçici (Segmented Control) */
+        .tense-picker {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            background: #E3E3E6;
+            border-radius: 10px;
+            padding: 2px;
+            margin-bottom: 25px;
+        }
+
+        .tense-btn {
+            border: none; background: none; padding: 6px 0; font-size: 12px;
+            font-weight: 600; border-radius: 8px; cursor: pointer;
+        }
+
+        .tense-btn.active {
+            background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Çekim Tablosu */
+        .conjugation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .conj-item {
+            background: #F8F8FA;
+            padding: 10px;
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
         }
 
-        .card-header { padding: 20px 15px 10px 15px; text-align: center; border-bottom: 0.5px solid #eee; }
-        .card-header h2 { margin: 0; font-size: 26px; font-weight: 700; color: var(--primary); }
-        .card-header span { font-size: 16px; color: #8e8e93; }
+        .pronoun { font-size: 10px; color: var(--accent); font-weight: 700; text-transform: uppercase; }
+        .form { font-size: 16px; font-weight: 600; }
+        .form-tr { font-size: 11px; color: var(--gray); }
 
-        /* TABLO SIKIŞMA ÇÖZÜMÜ: Yatay Kaydırma */
-        .table-wrapper { 
-            width: 100%; 
-            overflow-x: auto; /* Tablo sığmazsa sağa kaysın */
-            -webkit-overflow-scrolling: touch;
-            border-bottom: 0.5px solid #f2f2f7;
+        /* Örnek Butonu */
+        .ex-toggle {
+            background: var(--accent);
+            color: white; border: none; padding: 12px 20px;
+            border-radius: 14px; font-weight: 600; width: 100%;
         }
 
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            min-width: 480px; /* Tablonun harfler birbirine girmemesi için minimum genişliği */
+        /* Örnekler Paneli Overlay */
+        #exOverlay {
+            position: fixed; bottom: 0; left: 0; right: 0; top: 0;
+            background: rgba(0,0,0,0.5); display: none; z-index: 1000;
         }
 
-        th, td { border: 0.5px solid #f2f2f7; padding: 10px 4px; text-align: center; }
-        th { background: #fafafa; font-size: 11px; color: #8e8e93; text-transform: uppercase; }
-        
-        .tense-name { background-color: #fff9f2; font-weight: 700; font-size: 10px; color: var(--accent); width: 60px; }
-        .verb-form { font-size: 13px; font-weight: 600; color: var(--primary); display: block; }
-        .tr-form { font-size: 10px; color: #aeaeb2; display: block; margin-top: 2px; }
+        .ex-sheet {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: white; border-radius: 20px 20px 0 0;
+            padding: 30px 20px; max-height: 70vh; overflow-y: auto;
+        }
 
-        /* Örnekler */
-        .ex-item { padding: 15px; border-bottom: 0.5px solid #f2f2f7; border-left: 5px solid var(--blue); }
-        .theme-tag { font-size: 10px; color: var(--blue); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; display: block; }
-        .ex-es { font-weight: 500; color: var(--primary); display: block; font-size: 16px; line-height: 1.3; margin-bottom: 4px; }
-        .ex-tr { color: #636366; font-style: italic; display: block; font-size: 14px; }
+        .ex-card {
+            text-align: left; padding: 15px; border-bottom: 0.5px solid #EEE;
+        }
 
-        /* Alt Gezinme Barı */
-        .controls {
+        /* Navigasyon */
+        footer {
+            padding: 10px 30px calc(env(safe-area-inset-bottom) + 15px);
             display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 25px calc(env(safe-area-inset-bottom) + 10px) 25px;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-top: 0.5px solid #c6c6c8;
         }
 
-        button { background: none; color: var(--blue); border: none; padding: 10px; font-weight: 600; font-size: 18px; cursor: pointer; }
-        button:disabled { color: #d1d1d6; }
-        #counter { font-weight: 500; color: #8e8e93; font-size: 14px; }
+        .nav-btn { font-size: 24px; color: var(--accent); background: none; border: none; font-weight: 700; }
     </style>
 </head>
 <body>
 
-<div class="search-container">
-    <input type="text" id="verbSearch" placeholder="Fiil ara (İspanyolca/Türkçe)..." oninput="searchVerb()">
+<header>
+    <div class="search-box">
+        <input type="text" id="verbSearch" placeholder="Fiil ara..." oninput="searchVerb()">
+    </div>
+</header>
+
+<main id="flashcard-container"></main>
+
+<footer>
+    <button class="nav-btn" onclick="changeCard(-1)">􀄪</button>
+    <div id="counter">1 / --</div>
+    <button class="nav-btn" onclick="changeCard(1)">􀄫</button>
+</footer>
+
+<div id="exOverlay" onclick="toggleExamples(false)">
+    <div class="ex-sheet" onclick="event.stopPropagation()">
+        <h3 style="margin-top:0">Örnekler</h3>
+        <div id="exContent"></div>
+        <button class="ex-toggle" style="margin-top:20px" onclick="toggleExamples(false)">Kapat</button>
+    </div>
 </div>
 
-<div id="flashcard-container"></div>
+<script>
+    const SHEET_TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQdKhRHcoqhnlbBvPiGFSh1bHLQJyhj7bi8geY1a9jtYDke0ph_65uNp_VwubpaqBVvia_LzsTQsurc/pub?output=tsv';
 
-<div class="controls">
-    <button id="prevBtn" onclick="changeCard(-1)">Geri</button>
-    <div id="counter">1 / 24</div>
-    <button id="nextBtn" onclick="changeCard(1)">İleri</button>
-</div>
+    let verbs = [];
+    let currentIdx = 0;
+    let currentTenseIdx = 0; // 0: Pres, 1: Indef, 2: Imperat, 3: Futuro
 
-// Google Sheets TSV Linkin
-const SHEET_TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQdKhRHcoqhnlbBvPiGFSh1bHLQJyhj7bi8geY1a9jtYDke0ph_65uNp_VwubpaqBVvia_LzsTQsurc/pub?output=tsv';
-
-let verbs = [];
-let currentIdx = 0;
-
-async function loadData() {
-    try {
-        const response = await fetch(SHEET_TSV_URL);
-        const text = await response.text();
-        
-        // Satırlara böl ve boş satırları temizle
-        const rows = text.split(/\r?\n/).slice(1); 
-        
-        verbs = rows.filter(row => row.trim() !== "").map(row => {
-            // TSV olduğu için sekmeyle (\t) bölüyoruz
-            const c = row.split('\t'); 
+    async function loadData() {
+        try {
+            const res = await fetch(SHEET_TSV_URL);
+            const text = await res.text();
+            const rows = text.split(/\r?\n/).slice(1);
             
-            return {
-                es: c[0], // verb
-                tr: c[2], // tr (Sheet2'deki 3. sütun)
-                tenses: [
-                    { name: "Pres.", forms: (c[3]||"").split(';'), tr: (c[4]||"").split(';') },
-                    { name: "Indef.", forms: (c[5]||"").split(';'), tr: (c[6]||"").split(';') },
-                    { name: "Imperat.", forms: (c[7]||"").split(';'), tr: (c[8]||"").split(';') },
-                    { name: "Futuro", forms: (c[9]||"").split(';'), tr: (c[10]||"").split(';') }
-                ],
-                ex: (c[11] || "").split('#').map(item => {
-                    const parts = item.trim().split(':');
-                    return { 
-                        t: parts[0] || "Tema", 
-                        es: parts[1] || "", 
-                        tr: parts[2] || "" 
-                    };
-                })
-            };
-        });
-        
-        if (verbs.length > 0) renderCard(0);
-        else document.getElementById('flashcard-container').innerHTML = "Veri bulunamadı.";
-        
-    } catch (e) {
-        console.error("Yükleme hatası:", e);
-        document.getElementById('flashcard-container').innerHTML = "Hata: Veriler yüklenemedi.";
+            verbs = rows.filter(r => r.trim() !== "").map(row => {
+                const c = row.split('\t');
+                return {
+                    es: c[0], tr: c[2],
+                    tenses: [
+                        { name: "Pres.", forms: (c[3]||"").split(';'), tr: (c[4]||"").split(';') },
+                        { name: "Indef.", forms: (c[5]||"").split(';'), tr: (c[6]||"").split(';') },
+                        { name: "Imperat.", forms: (c[7]||"").split(';'), tr: (c[8]||"").split(';') },
+                        { name: "Futuro", forms: (c[9]||"").split(';'), tr: (c[10]||"").split(';') }
+                    ],
+                    ex: (c[11] || "").split('#').map(item => {
+                        const p = item.split(':');
+                        return { t: p[0], es: p[1], tr: p[2] };
+                    })
+                };
+            });
+            renderCard();
+        } catch (e) { alert("Veri yüklenemedi!"); }
     }
-}
 
-// Kartı ekrana basan fonksiyon
-function renderCard(idx) {
-    currentIdx = idx;
-    const verb = verbs[idx];
-    const container = document.getElementById('flashcard-container');
-    
-    let tableRows = verb.tenses.map(tense => `
-        <tr>
-            <td class="tense-name">${tense.name}</td>
-            ${tense.forms.map((f, i) => `
-                <td>
-                    <span class="verb-form">${f.trim()}</span>
-                    <span class="tr-form">${(tense.tr[i] || "").trim()}</span>
-                </td>
-            `).join('')}
-        </tr>
-    `).join('');
+    function renderCard() {
+        if (!verbs.length) return;
+        const v = verbs[currentIdx];
+        const t = v.tenses[currentTenseIdx];
+        const pronouns = ["Yo", "Tú", "Él/Ella", "Nos.", "Vos.", "Ellos"];
 
-    const html = `
-        <div class="card">
-            <div class="card-header">
-                <h2>${verb.es}</h2>
-                <span>(${verb.tr})</span>
+        let gridHtml = t.forms.map((f, i) => `
+            <div class="conj-item">
+                <span class="pronoun">${pronouns[i]}</span>
+                <span class="form">${f.trim()}</span>
+                <span class="form-tr">${(t.tr[i] || "").trim()}</span>
             </div>
-            <div class="table-wrapper">
-                <table>
-                    <tr><th>Zaman</th><th>Yo</th><th>Tú</th><th>Él</th><th>Nos.</th><th>Vos.</th><th>Ellos</th></tr>
-                    ${tableRows}
-                </table>
-            </div>
-            <div class="examples-grid">
-                ${verb.ex.map(e => `
-                    <div class="ex-item">
-                        <span class="theme-tag">${e.t}</span>
-                        <span class="ex-es">${e.es}</span>
-                        <span class="ex-tr">${e.tr}</span>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-    `;
-    container.innerHTML = html;
-    document.getElementById('counter').innerText = `${idx + 1} / ${verbs.length}`;
-    document.getElementById('prevBtn').disabled = idx === 0;
-    document.getElementById('nextBtn').disabled = idx === verbs.length - 1;
-}
+        `).join('');
 
-function changeCard(dir) {
-    if (currentIdx + dir >= 0 && currentIdx + dir < verbs.length) {
-        renderCard(currentIdx + dir);
+        const html = `
+            <div class="flashcard">
+                <h1 class="verb-title">${v.es}</h1>
+                <div class="verb-tr">${v.tr}</div>
+                
+                <div class="tense-picker">
+                    ${v.tenses.map((tense, i) => `
+                        <button class="tense-btn ${i === currentTenseIdx ? 'active' : ''}" 
+                                onclick="setTense(${i})">${tense.name}</button>
+                    `).join('')}
+                </div>
+
+                <div class="conjugation-grid">${gridHtml}</div>
+                
+                <button class="ex-toggle" onclick="toggleExamples(true)">Örnekleri Göster</button>
+            </div>
+        `;
+        
+        document.getElementById('flashcard-container').innerHTML = html;
+        document.getElementById('counter').innerText = `${currentIdx + 1} / ${verbs.length}`;
+        
+        // Örnek içeriğini hazırla
+        document.getElementById('exContent').innerHTML = v.ex.map(e => `
+            <div class="ex-card">
+                <b style="color:var(--accent); font-size:12px">${e.t}</b><br>
+                <div style="font-size:17px; margin:5px 0">${e.es}</div>
+                <div style="color:var(--gray); font-size:14px">${e.tr}</div>
+            </div>
+        `).join('');
     }
-}
 
-function searchVerb() {
-    const query = document.getElementById('verbSearch').value.toLowerCase();
-    const foundIdx = verbs.findIndex(v => v.es.toLowerCase().includes(query) || v.tr.toLowerCase().includes(query));
-    if (foundIdx !== -1) renderCard(foundIdx);
-}
+    function setTense(i) {
+        currentTenseIdx = i;
+        renderCard();
+    }
 
-// Uygulamayı başlat
-loadData();
+    function toggleExamples(show) {
+        document.getElementById('exOverlay').style.display = show ? 'block' : 'none';
+    }
+
+    function changeCard(dir) {
+        currentIdx = (currentIdx + dir + verbs.length) % verbs.length;
+        renderCard();
+    }
+
+    function searchVerb() {
+        const q = document.getElementById('verbSearch').value.toLowerCase();
+        const found = verbs.findIndex(v => v.es.toLowerCase().includes(q) || v.tr.toLowerCase().includes(q));
+        if (found !== -1) { currentIdx = found; renderCard(); }
+    }
+
+    loadData();
+</script>
 </body>
 </html>
