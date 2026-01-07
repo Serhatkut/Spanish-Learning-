@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>İspanyolca Pro</title>
+    <title>İspanyolca Kartlar</title>
     <style>
         :root {
             --ios-bg: #F2F2F7;
@@ -19,232 +19,50 @@
         body {
             font-family: -apple-system, system-ui, sans-serif;
             background-color: var(--ios-bg);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            color: var(--text-main);
+            margin: 0; display: flex; flex-direction: column;
+            height: 100vh; overflow: hidden; color: var(--text-main);
         }
 
-        /* Modern Arama Çubuğu */
         header {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             padding: calc(env(safe-area-inset-top) + 10px) 16px 12px;
-            border-bottom: 0.5px solid #C6C6C8;
+            border-bottom: 0.5px solid #C6C6C8; z-index: 10;
         }
 
-        .search-container {
-            background: #E3E3E6;
-            border-radius: 12px;
-            padding: 8px 12px;
-            display: flex;
-            align-items: center;
-        }
+        .search-box { background: #E3E3E6; border-radius: 10px; padding: 8px 12px; display: flex; }
+        #verbSearch { border: none; background: transparent; width: 100%; font-size: 17px; outline: none; }
 
-        #verbSearch {
-            border: none; background: transparent; width: 100%; font-size: 17px; outline: none;
-        }
-
-        /* Ana Kart Tasarımı */
-        main { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 100px; }
+        main { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 100px; -webkit-overflow-scrolling: touch; }
         
-        .verb-card {
-            background: var(--ios-card);
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.06);
-            margin-bottom: 20px;
+        .card { background: var(--ios-card); border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { font-size: 34px; font-weight: 800; margin: 0; }
+        .header p { font-size: 18px; color: var(--text-sec); margin: 4px 0; }
+
+        .section-label { font-size: 12px; font-weight: 700; color: var(--text-sec); text-transform: uppercase; margin: 15px 0 8px 4px; display: block; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .box { background: #F8F8FA; border: 0.5px solid #E5E5EA; padding: 10px; border-radius: 14px; }
+        .p-label { font-size: 9px; color: var(--action-blue); font-weight: 800; text-transform: uppercase; }
+        .v-form { font-size: 15px; font-weight: 600; display: block; margin: 1px 0; }
+        .v-tr { font-size: 10px; color: var(--text-sec); line-height: 1.2; display: block; }
+
+        .ex-btn {
+            background: linear-gradient(135deg, var(--action-blue), var(--past-purple));
+            color: white; border: none; padding: 16px; border-radius: 16px;
+            width: 100%; font-size: 17px; font-weight: 600; margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(0,122,255,0.2); transition: 0.2s;
         }
+        .ex-btn:active { transform: scale(0.97); opacity: 0.9; }
 
-        .verb-header { text-align: center; margin-bottom: 24px; }
-        .verb-header h1 { font-size: 36px; font-weight: 800; margin: 0; letter-spacing: -1px; }
-        .verb-header p { font-size: 20px; color: var(--text-sec); margin: 4px 0 0; }
+        #exSheet { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; z-index: 2000; }
+        .sheet-content { position: absolute; bottom: 0; left: 0; right: 0; background: white; border-radius: 20px 20px 0 0; padding: 25px 20px calc(env(safe-area-inset-bottom) + 20px); max-height: 75vh; overflow-y: auto; }
+        .ex-item { background: #F2F2F7; padding: 14px; border-radius: 14px; margin-bottom: 10px; border-left: 4px solid var(--spain-gold); }
 
-        /* Zaman Başlıkları ve Grid */
-        .section-label {
-            font-size: 13px; font-weight: 700; color: var(--text-sec);
-            text-transform: uppercase; margin: 20px 0 10px 4px; display: block;
-        }
-
-        .conjugation-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
-        }
-
-        .conj-box {
-            background: #F8F8FA; border: 0.5px solid #E5E5EA;
-            padding: 12px; border-radius: 16px; transition: all 0.2s;
-        }
-
-        .conj-box:active { background: #E5E5EA; transform: scale(0.98); }
-
-        .p-label { font-size: 10px; color: var(--action-blue); font-weight: 800; }
-        .v-form { font-size: 16px; font-weight: 600; display: block; margin: 2px 0; }
-        .v-tr { font-size: 11px; color: var(--text-sec); }
-
-        /* İnteraktif Dizi Butonu */
-        .example-btn {
-            background: linear-gradient(135deg, var(--action-blue), #5856D6);
-            color: white; border: none; padding: 16px; border-radius: 18px;
-            width: 100%; font-size: 17px; font-weight: 600; margin-top: 24px;
-            box-shadow: 0 4px 15px rgba(0,122,255,0.3);
-            transition: transform 0.1s;
-        }
-
-        .example-btn:active { transform: scale(0.96); }
-
-        /* Dizi Paneli (Bottom Sheet) */
-        #exSheet {
-            position: fixed; bottom: 0; left: 0; right: 0; top: 0;
-            background: rgba(0,0,0,0.4); display: none; z-index: 2000;
-        }
-
-        .sheet-content {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            background: white; border-radius: 24px 24px 0 0;
-            padding: 32px 20px calc(env(safe-area-inset-bottom) + 20px);
-            max-height: 80vh; overflow-y: auto;
-        }
-
-        .ex-card {
-            background: #F2F2F7; padding: 16px; border-radius: 16px; margin-bottom: 12px;
-            border-left: 4px solid var(--spain-gold);
-        }
-
-        /* Navigasyon Barı */
         footer {
-            position: fixed; bottom: 0; width: 100%;
-            background: rgba(255,255,255,0.85); backdrop-filter: blur(20px);
-            padding: 12px 32px calc(env(safe-area-inset-bottom) + 8px);
+            position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,0.85); backdrop-filter: blur(20px);
+            padding: 10px 40px calc(env(safe-area-inset-bottom) + 10px);
             display: flex; justify-content: space-between; align-items: center;
             border-top: 0.5px solid #C6C6C8; box-sizing: border-box;
         }
-
-        .nav-btn { font-size: 28px; color: var(--action-blue); background: none; border: none; padding: 8px; }
-        #counter { font-size: 15px; font-weight: 600; color: var(--text-sec); }
-
+        .nav-btn { font-size: 30px; color: var(--action-blue); background: none; border: none; padding: 10px; }
     </style>
-</head>
-<body>
-
-<header>
-    <div class="search-container">
-        <input type="text" id="verbSearch" placeholder="Fiil veya anlam ara..." oninput="searchVerb()">
-    </div>
-</header>
-
-<main id="content-area"></main>
-
-<footer>
-    <button class="nav-btn" onclick="changeCard(-1)">􀄪</button>
-    <div id="counter">1 / 100</div>
-    <button class="nav-btn" onclick="changeCard(1)">􀄫</button>
-</footer>
-
-<div id="exSheet" onclick="this.style.display='none'">
-    <div class="sheet-content" onclick="event.stopPropagation()">
-        <div style="width: 40px; height: 5px; background: #D1D1D6; border-radius: 3px; margin: -10px auto 20px;"></div>
-        <h2 style="margin-top:0">Dizi Replikleri</h2>
-        <div id="exList"></div>
-    </div>
-</div>
-
-<script>
-    const TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQdKhRHcoqhnlbBvPiGFSh1bHLQJyhj7bi8geY1a9jtYDke0ph_65uNp_VwubpaqBVvia_LzsTQsurc/pub?output=tsv'; // Google Sheets TSV Linki
-    let verbs = [], currentIdx = 0;
-    const pNames = ["Yo", "Tú", "Él/Ella", "Nos.", "Vos.", "Ellos"];
-
-    async function loadData() {
-        try {
-            const r = await fetch(TSV_URL);
-            const t = await r.text();
-            const rows = t.split(/\r?\n/).slice(1);
-            verbs = rows.filter(row => row.trim() !== "").map(row => {
-                const c = row.split('\t');
-                return {
-                    es: c[0], tr: c[2],
-                    perf: { es: (c[3]||"").split(';'), tr: (c[4]||"").split(';') },
-                    near: { es: (c[5]||"").split(';'), tr: (c[6]||"").split(';') },
-                    estar: { es: (c[7]||"").split(';'), tr: (c[8]||"").split(';') },
-                    acabar: { es: (c[9]||"").split(';'), tr: (c[10]||"").split(';') },
-                    tener: { es: (c[11]||"").split(';'), tr: (c[12]||"").split(';') },
-                    pres: { es: (c[13]||"").split(';'), tr: (c[14]||"").split(';') },
-                    indef: { es: (c[15]||"").split(';'), tr: (c[16]||"").split(';') },
-                    ex: (c[17]||"").split('#').map(i => { const p = i.split(':'); return {s:p[0], es:p[1], tr:p[2]}; })
-                };
-            });
-            render();
-        } catch (e) { alert("Veri yüklenemedi!"); }
-    }
-
-    function createSection(obj, title, color) {
-        let html = `<span class="section-label" style="color:${color}">${title}</span><div class="conjugation-grid">`;
-        for(let i=0; i<6; i++) {
-            html += `
-                <div class="conj-box">
-                    <span class="p-label">${pNames[i]}</span>
-                    <span class="v-form">${(obj.es[i]||"-").trim()}</span>
-                    <span class="v-tr">${(obj.tr[i]||"-").trim()}</span>
-                </div>`;
-        }
-        html += `</div>`;
-        return html;
-    }
-
-    function render() {
-        const v = verbs[currentIdx];
-        const container = document.getElementById('content-area');
-        container.innerHTML = `
-            <div class="verb-card">
-                <div class="verb-header">
-                    <h1>${v.es}</h1>
-                    <p>${v.tr}</p>
-                </div>
-                ${createSection(v.perf, "İspanya'da En Çok Kullanılan (Perfecto)", "var(--spain-gold)")}
-                ${createSection(v.near, "Gelecek Planı (Ir a)", "var(--action-blue)")}
-                
-                <span class="section-label" style="color:var(--now-green)">Kritik Kalıplar (Yo)</span>
-                <div class="conjugation-grid">
-                    <div class="conj-box"><span class="p-label">Şu An</span><span class="v-form">${v.estar.es[0]}</span><span class="v-tr">${v.estar.tr[0]}</span></div>
-                    <div class="conj-box"><span class="p-label">Az Önce</span><span class="v-form">${v.acabar.es[0]}</span><span class="v-tr">${v.acabar.tr[0]}</span></div>
-                </div>
-
-                ${createSection(v.pres, "Geniş Zaman (Presente)", "var(--text-main)")}
-                ${createSection(v.indef, "Bitmiş Geçmiş (Indefinido)", "var(--past-purple)")}
-
-                <button class="example-btn" onclick="openEx()">􀊫 Dizi Repliklerini Göster</button>
-            </div>
-        `;
-        document.getElementById('counter').innerText = `${currentIdx + 1} / ${verbs.length}`;
-        document.getElementById('content-area').scrollTop = 0;
-    }
-
-    function openEx() {
-        const v = verbs[currentIdx];
-        document.getElementById('exList').innerHTML = v.ex.map(e => `
-            <div class="ex-card">
-                <b style="color:var(--past-purple); font-size:12px">${e.s}</b>
-                <div style="font-size:17px; margin:6px 0">${e.es}</div>
-                <div style="color:var(--text-sec); font-size:14px; font-style:italic">${e.tr}</div>
-            </div>
-        `).join('');
-        document.getElementById('exSheet').style.display = 'block';
-    }
-
-    function changeCard(d) {
-        currentIdx = (currentIdx + d + verbs.length) % verbs.length;
-        render();
-    }
-
-    function searchVerb() {
-        const q = document.getElementById('verbSearch').value.toLowerCase();
-        const i = verbs.findIndex(v => v.es.toLowerCase().includes(q) || v.tr.toLowerCase().includes(q));
-        if(i !== -1) { currentIdx = i; render(); }
-    }
-
-    loadData();
-</script>
-</body>
-</html>
