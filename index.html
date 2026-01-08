@@ -2,113 +2,169 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>İspanyolca Kartlar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>İspanyolca Master v7</title>
     <style>
         :root {
-            --ios-bg: #F2F2F7;
-            --ios-card: #FFFFFF;
-            --spain-gold: #FF9500;
-            --action-blue: #007AFF;
-            --past-purple: #5856D6;
-            --now-green: #34C759;
-            --text-main: #1C1C1E;
-            --text-sec: #8E8E93;
+            --bg: #000000; --card: #0f172a; --accent: #22d3ee;
+            --text: #ffffff; --border: #334155; --highlight: #fde047;
         }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        body {
-            font-family: -apple-system, system-ui, sans-serif;
-            background-color: var(--ios-bg);
-            margin: 0; display: flex; flex-direction: column;
-            height: 100vh; overflow: hidden; color: var(--text-main);
-        }
+        /* Arama ve İki Katlı Navigasyon */
+        .top-panel { background: #000; border-bottom: 2px solid var(--accent); z-index: 200; padding: 10px 0; }
+        .search-container { padding: 0 15px 10px; position: relative; }
+        .search-input { width: 100%; padding: 14px; background: #1e293b; border: 2px solid var(--border); border-radius: 12px; color: white; font-size: 16px; outline: none; }
+        .search-results { position: absolute; top: 60px; left: 15px; right: 15px; background: #1e293b; border: 2px solid var(--accent); border-radius: 12px; max-height: 250px; overflow-y: auto; display: none; z-index: 300; }
+        .res-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
 
-        header {
-            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            padding: calc(env(safe-area-inset-top) + 10px) 16px 12px;
-            border-bottom: 0.5px solid #C6C6C8; z-index: 10;
-        }
-
-        .search-box { background: #E3E3E6; border-radius: 10px; padding: 8px 12px; display: flex; }
-        #verbSearch { border: none; background: transparent; width: 100%; font-size: 17px; outline: none; }
-
-        main { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 120px; -webkit-overflow-scrolling: touch; }
+        .nav-label { font-size: 10px; color: var(--accent); font-weight: 900; text-transform: uppercase; margin: 5px 15px 2px; }
+        .nav-row { display: flex; overflow-x: auto; gap: 8px; padding: 5px 15px; scrollbar-width: none; }
+        .nav-row::-webkit-scrollbar { display: none; }
         
-        .card { background: var(--ios-card); border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { font-size: 34px; font-weight: 800; margin: 0; }
-        .header p { font-size: 18px; color: var(--text-sec); margin: 4px 0; }
+        .t-btn { display: flex; flex-direction: column; align-items: center; min-width: 115px; padding: 10px; background: #0f172a; border: 2px solid var(--border); border-radius: 14px; cursor: pointer; }
+        .t-btn.active { background: var(--accent); border-color: #fff; }
+        .t-btn span { color: #fff; font-size: 13px; font-weight: 800; }
+        .t-btn small { color: #94a3b8; font-size: 9px; text-transform: uppercase; }
+        .t-btn.active span, .t-btn.active small { color: #000; font-weight: 900; }
 
-        /* Segmented Control Tasarımı */
-        .segmented-control {
-            display: grid; grid-template-columns: repeat(4, 1fr);
-            background: #E3E3E6; border-radius: 10px; padding: 2px; margin-bottom: 20px;
+        /* Kart Alanı */
+        #app { flex: 1; overflow-y: auto; padding: 15px; display: none; }
+        .v-card { background: var(--card); border-radius: 28px; padding: 25px; border: 1px solid var(--border); margin-bottom: 120px; }
+        .v-title { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        .v-title h1 { margin: 0; font-size: 48px; color: var(--accent); }
+        .v-title p { margin: 8px 0 0; font-size: 22px; color: var(--highlight); font-weight: 700; }
+
+        /* Çekimler ve Büyük Örnekler */
+        .grid { display: flex; flex-direction: column; gap: 10px; }
+        .row { background: #1e293b; border-radius: 18px; padding: 18px; border: 2px solid transparent; }
+        .row.active { border-color: var(--highlight); background: #0f172a; }
+        .p-label { color: var(--accent); font-size: 11px; font-weight: 900; text-transform: uppercase; margin-bottom: 6px; display: block; }
+        .val-flex { display: flex; justify-content: space-between; align-items: center; }
+        .es { font-size: 22px; font-weight: 800; color: #fff; }
+        .tr { font-size: 18px; color: #94a3b8; }
+
+        .ex-box { 
+            margin-top: 20px; padding: 20px; background: #000; 
+            border: 3px solid var(--highlight); border-radius: 20px;
+            display: none; animation: pop 0.3s ease;
         }
-        .segment-btn {
-            border: none; background: none; padding: 8px 0; font-size: 12px;
-            font-weight: 600; border-radius: 8px; cursor: pointer; color: var(--text-sec);
-        }
-        .segment-btn.active { background: white; color: var(--text-main); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .row.active .ex-box { display: block; }
+        .ctx { color: var(--accent); font-weight: 900; font-size: 12px; text-transform: uppercase; margin-bottom: 10px; display: block; }
+        .ex-es { font-size: 22px; color: #fff; line-height: 1.4; display: block; margin-bottom: 10px; font-style: italic; }
+        .ex-tr { color: var(--highlight); font-size: 19px; font-weight: 700; display: block; }
 
-        .section-label { font-size: 12px; font-weight: 700; color: var(--text-sec); text-transform: uppercase; margin: 15px 0 8px 4px; display: block; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .box { background: #F8F8FA; border: 0.5px solid #E5E5EA; padding: 10px; border-radius: 14px; }
-        .p-label { font-size: 9px; color: var(--action-blue); font-weight: 800; text-transform: uppercase; }
-        .v-form { font-size: 15px; font-weight: 600; display: block; margin: 1px 0; }
-        .v-tr { font-size: 10px; color: var(--text-sec); line-height: 1.2; display: block; }
+        /* Footer */
+        .footer { position: fixed; bottom: 0; width: 100%; padding: 20px; background: linear-gradient(transparent, #000 60%); display: flex; justify-content: center; z-index: 100; }
+        .next-btn { width: 100%; max-width: 400px; padding: 22px; background: var(--highlight); color: #000; border: none; border-radius: 20px; font-size: 22px; font-weight: 900; box-shadow: 0 0 20px rgba(253, 224, 71, 0.4); }
 
-        .ex-btn {
-            background: linear-gradient(135deg, var(--action-blue), var(--past-purple));
-            color: white; border: none; padding: 16px; border-radius: 16px;
-            width: 100%; font-size: 17px; font-weight: 600; margin-top: 20px;
-            box-shadow: 0 4px 12px rgba(0,122,255,0.2);
-        }
-
-        #exSheet { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; z-index: 2000; }
-        .sheet-content { position: absolute; bottom: 0; left: 0; right: 0; background: white; border-radius: 20px 20px 0 0; padding: 25px 20px calc(env(safe-area-inset-bottom) + 20px); max-height: 75vh; overflow-y: auto; }
-        .ex-item { background: #F2F2F7; padding: 14px; border-radius: 14px; margin-bottom: 10px; border-left: 4px solid var(--spain-gold); }
-
-        footer {
-            position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,0.85); backdrop-filter: blur(20px);
-            padding: 10px 40px calc(env(safe-area-inset-bottom) + 10px);
-            display: flex; justify-content: space-between; align-items: center;
-            border-top: 0.5px solid #C6C6C8; box-sizing: border-box;
-        }
-        .nav-btn { font-size: 30px; color: var(--action-blue); background: none; border: none; padding: 10px; }
+        @keyframes pop { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .loader { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; color: var(--accent); font-weight: bold; }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="search-box"><input type="text" id="verbSearch" placeholder="Fiil ara..." oninput="searchVerb()"></div>
-</header>
+    <div id="loader" class="loader">FİİLLER YÜKLENİYOR...</div>
 
-<main id="app"></main>
-
-<footer>
-    <button class="nav-btn" onclick="changeCard(-1)">􀄪</button>
-    <div id="counter">-- / --</div>
-    <button class="nav-btn" onclick="changeCard(1)">􀄫</button>
-</footer>
-
-<div id="exSheet" onclick="this.style.display='none'">
-    <div class="sheet-content" onclick="event.stopPropagation()">
-        <h2 style="margin-top:0">Dizi Replikleri</h2>
-        <div id="exList"></div>
-        <button class="ex-btn" style="background:var(--text-sec)" onclick="document.getElementById('exSheet').style.display='none'">Kapat</button>
+    <div id="top" class="top-panel" style="display:none;">
+        <div class="search-container">
+            <input type="text" id="sInp" class="search-input" placeholder="Fiil ara..." oninput="doSearch(this.value)">
+            <div id="sRes" class="search-results"></div>
+        </div>
+        <div class="nav-label">Temel Zamanlar</div>
+        <div class="nav-row" id="rowS"></div>
+        <div class="nav-label">Kalıplar & Kipler</div>
+        <div class="nav-row" id="rowC"></div>
     </div>
-</div>
+
+    <div id="app">
+        <div class="card-container"><div id="card"></div></div>
+    </div>
+
+    <div class="footer"><button class="next-btn" onclick="rndVerb()">SONRAKİ FİİL (RANDOM)</button></div>
 
 <script>
-const SHEET_TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQdKhRHcoqhnlbBvPiGFSh1bHLQJyhj7bi8geY1a9jtYDke0ph_65uNp_VwubpaqBVvia_LzsTQsurc/pub?output=tsv';
-let verbs = [], currentIdx = 0, currentTab = 'Pres'; // Varsayılan sekme
-const pronouns = ["Yo", "Tú", "Él/Ella", "Nos.", "Vos.", "Ellos"];
+    const TSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQdKhRHcoqhnlbBvPiGFSh1bHLQJyhj7bi8geY1a9jtYDke0ph_65uNp_VwubpaqBVvia_LzsTQsurc/pub?output=tsv';
+    
+    let verbs = []; let curV = -1; let curT = 'pres';
+    const pers = ["Yo", "Tú", "Él/Ella", "Nosotros", "Vosotros", "Ellos/Ellas"];
 
-async function loadData() {
-    try {
-        const res = await fetch(SHEET_TSV_URL);
-        const text = await res.text();
-        const rows = text.split(/\r?\n/).slice(1);
-        verbs = rows.filter(r => r.trim() !== "").map(row => {
-            const c = row.split('\t');
-            return {
+    // Sütun İndeksleri (AK kolonuna kadar tam uyumlu)
+    const tSimp = [
+        { id: 'pres', n: 'Presente', t: 'Şimdiki', e: 11, tr: 12, ex: 30 },
+        { id: 'perf', n: 'Perfecto', t: 'Y. Geçmiş', e: 5, tr: 6, ex: 27 },
+        { id: 'indef', n: 'Indefinido', t: 'D. Geçmiş', e: 7, tr: 8, ex: 28 },
+        { id: 'imp', n: 'Imperfecto', t: 'Yo-rdu', e: 9, tr: 10, ex: 29 },
+        { id: 'fut', n: 'Futuro', t: 'Gelecek', e: 17, tr: 18, ex: 31 }
+    ];
+    const tComp = [
+        { id: 'ira', n: 'Ir a...', t: 'Voy a...', e: 15, tr: 16, ex: 32 }, // AG (32)
+        { id: 'estar', n: 'Estar -ndo', t: 'Şu An', e: 13, tr: 14, ex: 33 }, // AH (33)
+        { id: 'acabar', n: 'Acabar de', t: 'Az Önce', e: 19, tr: 20, ex: 34 }, // AI (34)
+        { id: 'tener', n: 'Tengo que', t: 'Zorunlu', e: 21, tr: 22, ex: 35 }, // AJ (35)
+        { id: 'subj', n: 'Subjuntivo', t: 'Dilek-Şart', e: 25, tr: 26, ex: 36 } // AK (36)
+    ];
+    const tAll = [...tSimp, ...tComp];
+
+    async function start() {
+        try {
+            const r = await fetch(TSV); const txt = await r.text();
+            const rows = txt.split('\r\n').filter(l => l.trim() !== "");
+            verbs = rows.slice(1).map((l, i) => {
+                const c = l.split('\t');
+                const v = { id: i, es: c[0], tr: c[4] || "?" };
+                tAll.forEach(t => v[t.id] = { es: (c[t.e]||"").split(';'), tr: (c[t.tr]||"").split(';'), ex: (c[t.ex]||"").split(';') });
+                return v;
+            });
+            document.getElementById('loader').style.display='none';
+            document.getElementById('top').style.display='block';
+            document.getElementById('app').style.display='block';
+            buildNav(); rndVerb();
+        } catch(e) { document.getElementById('loader').innerText="BAĞLANTI HATASI!"; }
+    }
+
+    function buildNav() {
+        const render = (id, list) => {
+            document.getElementById(id).innerHTML = list.map(t => `
+                <div class="t-btn ${t.id==curT?'active':''}" id="b-${t.id}" onclick="setT('${t.id}')">
+                    <span>${t.n}</span><small>${t.t}</small>
+                </div>`).join('');
+        };
+        render('rowS', tSimp); render('rowC', tComp);
+    }
+
+    function doSearch(v) {
+        const r = document.getElementById('sRes');
+        if(!v) { r.style.display='none'; return; }
+        const f = verbs.filter(x => x.es.toLowerCase().includes(v.toLowerCase())).slice(0,8);
+        r.innerHTML = f.map(x => `<div class="res-item" onclick="selV(${x.id})"><b>${x.es}</b><span style="color:#94a3b8">${x.tr}</span></div>`).join('');
+        r.style.display = f.length?'block':'none';
+    }
+
+    function selV(id) { curV = verbs.findIndex(x=>x.id==id); document.getElementById('sRes').style.display='none'; document.getElementById('sInp').value=""; render(); }
+    function rndVerb() { curV = Math.floor(Math.random()*verbs.length); render(); }
+    function setT(id) { curT = id; document.querySelectorAll('.t-btn').forEach(b=>b.classList.remove('active')); document.getElementById(`b-${id}`).classList.add('active'); render(); }
+
+    function render() {
+        const v = verbs[curV]; if(!v) return;
+        document.getElementById('card').innerHTML = `<div class="v-card"><div class="v-title"><h1>${v.es}</h1><p>${v.tr}</p></div><div id="grid" class="grid"></div></div>`;
+        const tD = v[curT]; document.getElementById('grid').innerHTML = pers.map((p, i) => {
+            const bits = (tD.ex[i] || "").split(':');
+            return `<div class="row" onclick="toggleRow(this)">
+                <span class="p-label">${p}</span>
+                <div class="val-flex"><span class="es">${tD.es[i]||"-"}</span><span class="tr">${tD.tr[i]||"-"}</span></div>
+                ${bits.length>=2 ? `<div class="ex-box"><span class="ctx">${bits[0]}</span><span class="ex-es">${bits[1]}</span><span class="ex-tr">${bits[2]||""}</span></div>`:''}
+            </div>`;
+        }).join('');
+    }
+
+    function toggleRow(el) {
+        const active = el.classList.contains('active');
+        document.querySelectorAll('.row').forEach(r => r.classList.remove('active'));
+        if(!active) el.classList.add('active');
+    }
+    start();
+</script>
+</body>
+</html>
