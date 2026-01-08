@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>İspanyolca Master v15</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
+    <title>İspanyolca Master v20</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 750 500%22><rect width=%22750%22 height=%22500%22 fill=%22%23c60b1e%22/><rect width=%22750%22 height=%22250%22 y=%22125%22 fill=%22%23ffc400%22/></svg>">
     <style>
         :root {
+            --sat: env(safe-area-inset-top);
+            --sab: env(safe-area-inset-bottom);
             --bg: #000; --card: #0f172a; --accent: #22d3ee;
             --text: #fff; --border: #334155; --highlight: #fde047;
             --secondary-bg: #1e293b; --row-bg: #1e293b;
-            --modal-bg: rgba(0, 0, 0, 0.95);
+            --modal-bg: rgba(0, 0, 0, 0.98);
         }
         [data-theme="light"] {
             --bg: #f1f5f9; --card: #ffffff; --accent: #0284c7;
@@ -18,111 +20,106 @@
             --secondary-bg: #e2e8f0; --row-bg: #f8fafc;
             --modal-bg: rgba(255, 255, 255, 0.98);
         }
-        [data-theme="high-contrast"] {
-            --bg: #000; --card: #000; --accent: #0f0;
-            --text: #fff; --border: #fff; --highlight: #ff0;
-            --secondary-bg: #000; --row-bg: #000;
-            --modal-bg: rgba(0, 0, 0, 1);
-        }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; padding-top: env(safe-area-inset-top); }
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            background: var(--bg); color: var(--text);
+            margin: 0; min-height: 100svh; height: 100dvh;
+            display: flex; flex-direction: column; overflow: hidden;
+            padding-top: var(--sat);
+        }
 
-        /* UI Elemanları */
         .app-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 15px; background: var(--bg); border-bottom: 1px solid var(--border); flex-shrink: 0; }
         .logo { display: flex; align-items: center; gap: 8px; }
-        .logo h2 { margin: 0; font-size: 14px; color: var(--accent); letter-spacing: 1px; }
-        #themeSelect { background: var(--secondary-bg); color: var(--text); border: 1px solid var(--border); padding: 4px; border-radius: 8px; font-size: 11px; }
+        .logo h2 { margin: 0; font-size: 13px; color: var(--accent); letter-spacing: 0.5px; }
+        #themeSelect { background: var(--secondary-bg); color: var(--text); border: 1px solid var(--border); padding: 5px 8px; border-radius: 8px; font-size: 11px; outline: none; }
 
         .nav-wrapper { flex-shrink: 0; background: var(--bg); }
         .main-tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); }
-        .main-tab-btn { flex: 1; padding: 10px; border: none; background: transparent; color: var(--text); opacity: 0.6; font-weight: 800; font-size: 10px; text-transform: uppercase; }
+        .main-tab-btn { flex: 1; padding: 12px 10px; border: none; background: transparent; color: var(--text); opacity: 0.6; font-weight: 800; font-size: 11px; text-transform: uppercase; }
         .main-tab-btn.active { opacity: 1; color: var(--accent); border-bottom: 3px solid var(--accent); }
 
         .sub-nav { padding: 8px 0; border-bottom: 2px solid var(--accent); }
         .nav-row { display: flex; overflow-x: auto; gap: 8px; padding: 0 15px; scrollbar-width: none; }
-        .nav-row::-webkit-scrollbar { display: none; }
-        
-        .t-btn { display: flex; flex-direction: column; align-items: center; min-width: 90px; padding: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; }
+        .t-btn { display: flex; flex-direction: column; align-items: center; min-width: 96px; padding: 10px 8px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; }
         .t-btn.active { background: var(--accent); border-color: var(--text); }
         .t-btn span { color: var(--text); font-size: 11px; font-weight: 700; }
-        .t-btn small { color: var(--accent); font-size: 8px; text-transform: uppercase; }
         .t-btn.active span, .t-btn.active small { color: var(--bg); font-weight: 800; }
 
         #app { flex: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
-        .card-container { max-width: 500px; margin: 0 auto; padding-bottom: 40px; }
-        
-        /* Fiil Kartı & Matrix Tetikleyici */
         .v-card { background: var(--card); border-radius: 24px; padding: 20px; border: 1px solid var(--border); }
-        .v-title { text-align: center; margin-bottom: 15px; }
-        .v-title h1 { margin: 0; font-size: 38px; color: var(--accent); cursor: pointer; text-decoration: underline dotted 2px; }
-        .v-title h1:active { opacity: 0.5; }
-        .v-title p { margin: 4px 0 0; font-size: 16px; color: var(--highlight); font-weight: 700; }
+        .v-title h1 { margin: 0; font-size: 38px; color: var(--accent); cursor: pointer; text-decoration: underline dotted 2px; text-align: center; }
+        .v-title p { text-align: center; color: var(--highlight); font-weight: 700; margin-top: 5px; }
 
-        .row { background: var(--row-bg); border-radius: 16px; padding: 12px; border: 1px solid var(--border); margin-bottom: 8px; }
-        .row.active { border-color: var(--highlight); background: var(--card); }
-        .p-label { color: var(--accent); font-size: 9px; font-weight: 900; text-transform: uppercase; margin-bottom: 2px; display: block; }
-        .val-flex { display: flex; justify-content: space-between; align-items: center; }
-        .es { font-size: 19px; font-weight: 800; }
-        .tr { font-size: 15px; opacity: 0.7; }
+        .row { background: var(--row-bg); border-radius: 16px; padding: 16px; border: 1px solid var(--border); margin-bottom: 12px; }
+        .row.active { border-color: var(--accent); background: var(--card); }
+        
+        /* Şahıs Etiketi */
+        .p-label { color: var(--accent); font-size: 13px; font-weight: 900; text-transform: uppercase; display: block; margin-bottom: 6px; }
+        
+        /* Ana Kelime Grubu */
+        .val-flex { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+        .es { font-size: 22px; font-weight: 800; color: var(--text); }
+        .tr { font-size: 16px; opacity: 0.5; font-weight: 400; }
 
-        .ex-box { margin-top: 12px; padding: 15px; background: var(--bg); border: 2px solid var(--highlight); border-radius: 14px; display: none; animation: pop 0.2s ease; }
-        .row.active .ex-box { display: block; }
-        .ctx { color: var(--accent); font-weight: 900; font-size: 10px; margin-bottom: 5px; display: block; }
-        .ex-es { font-size: 17px; font-style: italic; display: block; margin-bottom: 5px; line-height: 1.3; }
-        .ex-tr { color: var(--highlight); font-size: 15px; font-weight: 700; display: block; }
-
-        /* ÇEKİM MATRİSİ MODAL */
-        #matrixModal {
-            position: fixed; inset: 0; background: var(--modal-bg);
-            z-index: 1000; display: none; flex-direction: column;
-            padding: calc(20px + env(safe-area-inset-top)) 15px env(safe-area-inset-bottom);
+        /* ÖRNEK CÜMLE KUTUSU (EX-BOX) TASARIMI */
+        .ex-box { 
+            margin-top: 15px; padding: 15px; 
+            background: rgba(0,0,0,0.2); 
+            border-left: 4px solid var(--highlight); 
+            border-radius: 8px; 
+            display: none; 
+            flex-direction: column; gap: 8px;
+            animation: pop 0.2s ease; 
         }
-        .matrix-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .row.active .ex-box { display: flex; }
+        
+        .ctx { color: var(--accent); font-weight: 900; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .ex-es { font-size: 17px; color: var(--text); line-height: 1.4; font-weight: 500; }
+        .ex-tr { color: var(--highlight); font-size: 15px; opacity: 0.9; font-style: italic; }
+
+        /* MATRIX MODAL */
+        #matrixModal { position: fixed; inset: 0; background: var(--modal-bg); z-index: 1000; display: none; flex-direction: column; padding: calc(15px + var(--sat)) 15px calc(15px + var(--sab)); }
+        .matrix-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .matrix-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         
-        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 13px; }
-        th { background: var(--accent); color: #000; padding: 10px 5px; text-align: left; position: sticky; top: 0; }
-        td { border-bottom: 1px solid var(--border); padding: 10px 5px; }
-        .td-p { font-weight: 900; color: var(--accent); width: 60px; }
-        .td-v { color: var(--text); }
-        .matrix-title { color: var(--highlight); font-size: 14px; font-weight: 900; margin-bottom: 10px; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th { background: var(--accent); color: #000; padding: 8px 4px; text-align: left; position: sticky; top: 0; z-index: 10; }
+        td { border-bottom: 1px solid var(--border); padding: 12px 4px; }
+        .td-p { font-weight: 900; color: var(--accent); width: 45px; }
+        .td-v { color: var(--text); cursor: pointer; font-size: 13px; }
+        .matrix-title { color: var(--highlight); font-size: 13px; font-weight: 900; margin: 20px 0 10px; text-transform: uppercase; }
 
-        .close-matrix { background: var(--highlight); color: #000; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 900; font-size: 14px; }
+        .close-matrix { background: var(--highlight); color: #000; border: none; padding: 10px 15px; border-radius: 10px; font-weight: 900; }
 
-        /* Alt Panel */
-        .bottom-panel { flex-shrink: 0; background: var(--bg); border-top: 1px solid var(--border); padding: 10px 15px calc(10px + env(safe-area-inset-bottom)); z-index: 500; }
-        .footer-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .next-btn { flex: 1; padding: 10px; background: var(--highlight); color: #000; border: none; border-radius: 10px; font-size: 14px; font-weight: 900; }
-        .credits { margin-left: 15px; font-size: 8px; opacity: 0.5; text-align: right; line-height: 1; font-weight: bold; }
+        .bottom-panel { flex-shrink: 0; background: var(--bg); border-top: 1px solid var(--border); padding: 10px 15px calc(10px + var(--sab)); }
+        .next-btn { width: 100%; padding: 16px; background: var(--highlight); color: #000; border: none; border-radius: 12px; font-weight: 900; font-size: 15px; }
 
-        .search-container { position: relative; }
-        .search-input { width: 100%; padding: 10px; background: var(--secondary-bg); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; outline: none; }
-        .search-results { position: absolute; bottom: 100%; left: 0; right: 0; background: var(--card); border: 2px solid var(--accent); border-radius: 12px; max-height: 50dvh; overflow-y: auto; display: none; box-shadow: 0 -10px 30px rgba(0,0,0,0.8); margin-bottom: 10px; }
-        .res-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-
-        .loader { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; color: var(--accent); font-weight: bold; z-index: 2000; }
+        .loader { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; color: var(--accent); z-index: 2000; }
         @keyframes pop { from { transform: scale(0.98); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body data-theme="dark">
 
-    <div id="loader" class="loader">VERİLER YÜKLENİYOR...</div>
+    <div id="loader" class="loader">VERİLER HAZIRLANIYOR...</div>
 
     <div id="matrixModal">
         <div class="matrix-header">
             <h2 id="mVerbTitle" style="margin:0; color:var(--accent)">Mastarlar</h2>
             <button class="close-matrix" onclick="toggleMatrix(false)">KAPAT</button>
         </div>
-        <div class="matrix-content" id="mContent"></div>
+        <div class="matrix-content">
+            <div id="matrixExDisplay"></div>
+            <div id="mContent"></div>
+        </div>
     </div>
 
     <div class="app-header">
-        <div class="logo"><span>📖</span><h2>İSPANYOLCA MASTER</h2></div>
+        <div class="logo">📖<span style="font-size:18px">🇪🇸</span><h2>İSPANYOLCA MASTER</h2></div>
         <select id="themeSelect" onchange="changeTheme(this.value)">
             <option value="dark">🌙 Koyu</option>
             <option value="light">☀️ Açık</option>
-            <option value="high-contrast">👁️ Kontrast</option>
         </select>
     </div>
 
@@ -134,49 +131,50 @@
         <div class="sub-nav"><div class="nav-row" id="subRow"></div></div>
     </div>
 
-    <div id="app"><div class="card-container"><div id="card"></div></div></div>
+    <div id="app" style="display:none;"><div class="card-container" id="card"></div></div>
 
     <div class="bottom-panel" id="bottom" style="display:none;">
-        <div class="footer-top">
-            <button class="next-btn" onclick="rndVerb()">SONRAKİ FİİL (RANDOM)</button>
-            <div class="credits">DESIGNED BY<br><span style="color:var(--accent)">SERHAT KUT</span></div>
-        </div>
-        <div class="search-container">
-            <div id="sRes" class="search-results"></div>
-            <input type="text" id="sInp" class="search-input" placeholder="Fiil/Çekim ara (örn: hice)..." oninput="doSearch(this.value)">
-        </div>
+        <button class="next-btn" onclick="rndVerb()">SONRAKİ FİİL (RANDOM)</button>
     </div>
 
 <script>
     const TSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQdKhRHcoqhnlbBvPiGFSh1bHLQJyhj7bi8geY1a9jtYDke0ph_65uNp_VwubpaqBVvia_LzsTQsurc/pub?output=tsv';
-    const MY_EMAIL = "serhat@example.com";
-    
     let verbs = []; let curV = -1; let curT = 'pres'; let curGroup = 'simple';
     const pers = ["Yo", "Tú", "Él/Ella", "Nosotros", "Vosotros", "Ellos/Ellas"];
 
     const tSimp = [
-        { id: 'pres', n: 'Presente', t: 'Şimdiki', e: 11, tr: 12, ex: 30 },
-        { id: 'perf', n: 'Perfecto', t: 'Y. Geçmiş', e: 5, tr: 6, ex: 27 },
-        { id: 'indef', n: 'Indefinido', t: 'D. Geçmiş', e: 7, tr: 8, ex: 28 },
-        { id: 'imp', n: 'Imperfecto', t: 'Yo-rdu', e: 9, tr: 10, ex: 29 },
-        { id: 'fut', n: 'Futuro', t: 'Gelecek', e: 17, tr: 18, ex: 31 }
+        { id: 'pres', n: 'Pres.', t: 'Şimdiki', e: 11, tr: 12, ex: 30 },
+        { id: 'perf', n: 'Perf.', t: 'Y.Geçmiş', e: 5, tr: 6, ex: 27 },
+        { id: 'indef', n: 'Indef.', t: 'D.Geçmiş', e: 7, tr: 8, ex: 28 },
+        { id: 'imp', n: 'Imp.', t: 'Yo-rdu', e: 9, tr: 10, ex: 29 },
+        { id: 'fut', n: 'Fut.', t: 'Gelecek', e: 17, tr: 18, ex: 31 }
     ];
     const tComp = [
-        { id: 'ira', n: 'Ir a...', t: 'Voy a...', e: 15, tr: 16, ex: 32 },
-        { id: 'estar', n: 'Estar -ndo', t: 'Şu An', e: 13, tr: 14, ex: 33 },
-        { id: 'acabar', n: 'Acabar de', t: 'Az Önce', e: 19, tr: 20, ex: 34 },
-        { id: 'tener', n: 'Tengo que', t: 'Zorunlu', e: 21, tr: 22, ex: 35 },
-        { id: 'subj', n: 'Subjuntivo', t: 'Dilek-Şart', e: 25, tr: 26, ex: 36 }
+        { id: 'ira', n: 'Ir a', t: 'Gelecek', e: 15, tr: 16, ex: 32 },
+        { id: 'estar', n: 'Est.', t: 'Şu An', e: 13, tr: 14, ex: 33 },
+        { id: 'acabar', n: 'Acab.', t: 'Az Önce', e: 19, tr: 20, ex: 34 },
+        { id: 'tener', n: 'Ten.', t: 'Zorunlu', e: 21, tr: 22, ex: 35 },
+        { id: 'subj', n: 'Subj.', t: 'Dilek', e: 25, tr: 26, ex: 36 }
     ];
 
+    function triggerHaptic(ms = 15) {
+        if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(ms);
+    }
+
+    function changeTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('spanish_master_theme', theme);
+        triggerHaptic(10);
+    }
+
     async function start() {
-        const savedTheme = localStorage.getItem('theme') || 'dark';
+        const savedTheme = localStorage.getItem('spanish_master_theme') || 'dark';
         changeTheme(savedTheme);
         document.getElementById('themeSelect').value = savedTheme;
 
         try {
             const r = await fetch(TSV); const txt = await r.text();
-            const rows = txt.split('\r\n').filter(l => l.trim() !== "");
+            const rows = txt.split(/\r?\n/).filter(l => l.trim() !== "");
             verbs = rows.slice(1).map((l, i) => {
                 const c = l.split('\t');
                 const v = { id: i, es: c[0], tr: c[4] || "?" };
@@ -191,53 +189,48 @@
         } catch(e) { console.error(e); }
     }
 
-    function changeTheme(theme) { document.body.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); }
+    function showMatrixEx(tenseId, pi) {
+        triggerHaptic(10);
+        const v = verbs[curV];
+        const bits = (v[tenseId].ex[pi] || "").split(':');
+        const display = document.getElementById('matrixExDisplay');
+        if (bits.length >= 2) {
+            display.innerHTML = `
+                <div style="background:var(--secondary-bg); padding:15px; border-radius:12px; border:1px solid var(--accent); animation: pop 0.2s ease; display:flex; flex-direction:column; gap:6px;">
+                    <div class="ctx">${bits[0]} (${v[tenseId].tr[pi]})</div>
+                    <div class="ex-es">${bits[1]}</div>
+                    <div class="ex-tr">${bits[2]||""}</div>
+                </div>`;
+        } else {
+            display.innerHTML = `<div style="text-align:center; padding:10px; opacity:0.5; font-size:12px;">Örnek cümle bulunamadı.</div>`;
+        }
+    }
 
     function toggleMatrix(show) {
+        triggerHaptic(20);
         const m = document.getElementById('matrixModal');
         if(!show) { m.style.display = 'none'; return; }
-        
         const v = verbs[curV];
         document.getElementById('mVerbTitle').innerText = v.es.toUpperCase();
-        
+        document.getElementById('matrixExDisplay').innerHTML = `<div style="text-align:center; opacity:0.4; font-size:11px; padding:10px;">Detay için bir çekime dokun.</div>`;
         const buildTable = (title, list) => {
-            let h = `<div class="matrix-title">${title}</div><table><tr><th>Şahıs</th>`;
+            let h = `<div class="matrix-title">${title}</div><table><tr><th>Fiil</th>`;
             list.forEach(t => h += `<th>${t.n}</th>`);
             h += `</tr>`;
             pers.forEach((p, pi) => {
                 h += `<tr><td class="td-p">${p}</td>`;
-                list.forEach(t => h += `<td class="td-v">${v[t.id].es[pi] || '-'}</td>`);
+                list.forEach(t => h += `<td class="td-v" onclick="showMatrixEx('${t.id}', ${pi})">${v[t.id].es[pi] || '-'}</td>`);
                 h += `</tr>`;
             });
             h += `</table>`;
             return h;
         };
-
-        document.getElementById('mContent').innerHTML = 
-            buildTable('Temel Zamanlar', tSimp) + 
-            buildTable('Kalıplar & Kipler', tComp);
-        
+        document.getElementById('mContent').innerHTML = buildTable('Zamanlar', tSimp) + buildTable('Kalıplar', tComp);
         m.style.display = 'flex';
     }
 
-    function doSearch(v) {
-        const r = document.getElementById('sRes');
-        if(!v) { r.style.display='none'; return; }
-        const query = v.toLowerCase();
-        const f = verbs.filter(verb => {
-            if (verb.es.toLowerCase().includes(query)) return true;
-            return [...tSimp, ...tComp].some(tense => verb[tense.id].es.some(conj => conj.toLowerCase().includes(query)));
-        }).slice(0, 10);
-        
-        if (f.length > 0) {
-            r.innerHTML = f.map(x => `<div class="res-item" onclick="selV(${x.id})"><div><b>${x.es}</b><br><span class="res-sub">${x.tr}</span></div><span style="font-size:18px">➔</span></div>`).join('');
-        } else {
-            r.innerHTML = `<div style="padding:15px;text-align:center"><a style="color:var(--accent);text-decoration:none;font-size:12px;" href="mailto:${MY_EMAIL}?subject=Eksik Fiil&body='${v}' ekler misin?">✉️ Serhat'a Bildir</a></div>`;
-        }
-        r.style.display = 'block';
-    }
-
     function switchGroup(g) {
+        triggerHaptic(10);
         curGroup = g;
         document.getElementById('tabSimple').classList.toggle('active', g === 'simple');
         document.getElementById('tabComplex').classList.toggle('active', g === 'complex');
@@ -247,27 +240,32 @@
         render();
     }
 
-    function setT(id) { curT = id; document.querySelectorAll('.t-btn').forEach(b=>b.classList.remove('active')); const btn = document.getElementById(`b-${id}`); if(btn) btn.classList.add('active'); render(); }
-    function selV(id) { curV = verbs.findIndex(x=>x.id==id); document.getElementById('sRes').style.display='none'; document.getElementById('sInp').value=""; render(); }
-    function rndVerb() { curV = Math.floor(Math.random()*verbs.length); render(); }
+    function setT(id) { triggerHaptic(10); curT = id; render(); }
+    function rndVerb() { triggerHaptic(20); curV = Math.floor(Math.random()*verbs.length); render(); }
 
     function render() {
         const v = verbs[curV]; if(!v) return;
-        document.getElementById('card').innerHTML = `
-            <div class="v-card">
-                <div class="v-title">
-                    <h1 onclick="toggleMatrix(true)">${v.es}</h1>
-                    <p>${v.tr}</p>
-                </div>
-                <div id="grid" class="grid"></div>
-            </div>`;
-        const tD = v[curT]; document.getElementById('grid').innerHTML = pers.map((p, i) => {
+        document.getElementById('card').innerHTML = `<div class="v-card"><div class="v-title"><h1 onclick="toggleMatrix(true)">${v.es}</h1><p>${v.tr}</p></div><div id="grid"></div></div>`;
+        const tD = v[curT];
+        document.getElementById('grid').innerHTML = pers.map((p, i) => {
             const bits = (tD.ex[i] || "").split(':');
-            return `<div class="row" onclick="this.classList.toggle('active')"><span class="p-label">${p}</span><div class="val-flex"><span class="es">${tD.es[i]||"-"}</span><span class="tr">${tD.tr[i]||"-"}</span></div>${bits.length>=2 ? `<div class="ex-box"><span class="ctx">${bits[0]}</span><span class="ex-es">${bits[1]}</span><span class="ex-tr">${bits[2]||""}</span></div>`:''}</div>`;
+            return `
+                <div class="row" onclick="this.classList.toggle('active'); triggerHaptic(5);">
+                    <span class="p-label">${p}</span>
+                    <div class="val-flex">
+                        <span class="es">${tD.es[i]||"-"}</span>
+                        <span class="tr">${tD.tr[i]||"-"}</span>
+                    </div>
+                    ${bits.length>=2 ? `
+                        <div class="ex-box">
+                            <span class="ctx">${bits[0]}</span>
+                            <span class="ex-es">${bits[1]}</span>
+                            <span class="ex-tr">${bits[2]||""}</span>
+                        </div>` : ''}
+                </div>`;
         }).join('');
         document.getElementById('app').scrollTop = 0;
     }
-
     start();
 </script>
 </body>
