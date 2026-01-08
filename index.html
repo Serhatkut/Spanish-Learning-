@@ -3,94 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>İspanyolca Master v7</title>
+    <title>İspanyolca Kartlar Master</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
     <style>
+        /* TEMA DEĞİŞKENLERİ */
         :root {
-            --bg: #000000; --card: #0f172a; --accent: #22d3ee;
-            --text: #ffffff; --border: #334155; --highlight: #fde047;
+            --bg: #000; --card: #0f172a; --accent: #22d3ee;
+            --text: #fff; --border: #334155; --highlight: #fde047;
+            --secondary-bg: #1e293b; --row-bg: #1e293b;
         }
+
+        [data-theme="light"] {
+            --bg: #f1f5f9; --card: #ffffff; --accent: #0284c7;
+            --text: #0f172a; --border: #cbd5e1; --highlight: #ea580c;
+            --secondary-bg: #e2e8f0; --row-bg: #f8fafc;
+        }
+
+        [data-theme="high-contrast"] {
+            --bg: #000000; --card: #000000; --accent: #00ff00;
+            --text: #ffffff; --border: #ffffff; --highlight: #ffff00;
+            --secondary-bg: #000000; --row-bg: #000000;
+        }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.3s; }
 
-        /* Arama ve İki Katlı Navigasyon */
-        .top-panel { background: #000; border-bottom: 2px solid var(--accent); z-index: 200; padding: 10px 0; }
-        .search-container { padding: 0 15px 10px; position: relative; }
-        .search-input { width: 100%; padding: 14px; background: #1e293b; border: 2px solid var(--border); border-radius: 12px; color: white; font-size: 16px; outline: none; }
-        .search-results { position: absolute; top: 60px; left: 15px; right: 15px; background: #1e293b; border: 2px solid var(--accent); border-radius: 12px; max-height: 250px; overflow-y: auto; display: none; z-index: 300; }
-        .res-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+        /* Üst Header ve Tema Seçici */
+        .app-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background: var(--bg); border-bottom: 1px solid var(--border); }
+        .app-header .logo { display: flex; align-items: center; gap: 8px; }
+        .app-header h2 { margin: 0; font-size: 16px; color: var(--accent); letter-spacing: 1px; }
+        
+        #themeSelect { background: var(--secondary-bg); color: var(--text); border: 1px solid var(--border); padding: 5px; border-radius: 8px; font-size: 12px; outline: none; }
 
-        .nav-label { font-size: 10px; color: var(--accent); font-weight: 900; text-transform: uppercase; margin: 5px 15px 2px; }
-        .nav-row { display: flex; overflow-x: auto; gap: 8px; padding: 5px 15px; scrollbar-width: none; }
+        /* Navigasyon */
+        .main-tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); }
+        .main-tab-btn { flex: 1; padding: 12px; border: none; background: transparent; color: var(--text); opacity: 0.6; font-weight: 900; font-size: 10px; text-transform: uppercase; cursor: pointer; }
+        .main-tab-btn.active { opacity: 1; color: var(--accent); border-bottom: 3px solid var(--accent); background: rgba(34, 211, 238, 0.05); }
+
+        .sub-nav { background: var(--bg); padding: 10px 0; border-bottom: 2px solid var(--accent); }
+        .nav-row { display: flex; overflow-x: auto; gap: 8px; padding: 0 15px; scrollbar-width: none; }
         .nav-row::-webkit-scrollbar { display: none; }
         
-        .t-btn { display: flex; flex-direction: column; align-items: center; min-width: 115px; padding: 10px; background: #0f172a; border: 2px solid var(--border); border-radius: 14px; cursor: pointer; }
-        .t-btn.active { background: var(--accent); border-color: #fff; }
-        .t-btn span { color: #fff; font-size: 13px; font-weight: 800; }
-        .t-btn small { color: #94a3b8; font-size: 9px; text-transform: uppercase; }
-        .t-btn.active span, .t-btn.active small { color: #000; font-weight: 900; }
+        .t-btn { display: flex; flex-direction: column; align-items: center; min-width: 100px; padding: 8px; background: var(--card); border: 2px solid var(--border); border-radius: 12px; cursor: pointer; }
+        .t-btn.active { background: var(--accent); border-color: var(--text); }
+        .t-btn span { color: var(--text); font-size: 12px; font-weight: 800; }
+        .t-btn small { color: var(--accent); font-size: 8px; text-transform: uppercase; }
+        .t-btn.active span, .t-btn.active small { color: var(--bg); font-weight: 900; }
 
-        /* Kart Alanı */
-        #app { flex: 1; overflow-y: auto; padding: 15px; display: none; }
-        .v-card { background: var(--card); border-radius: 28px; padding: 25px; border: 1px solid var(--border); margin-bottom: 120px; }
-        .v-title { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
-        .v-title h1 { margin: 0; font-size: 48px; color: var(--accent); }
-        .v-title p { margin: 8px 0 0; font-size: 22px; color: var(--highlight); font-weight: 700; }
+        /* Ana İçerik */
+        #app { flex: 1; overflow-y: auto; padding: 15px; }
+        .card-container { max-width: 500px; margin: 0 auto; padding-bottom: 180px; }
+        .v-card { background: var(--card); border-radius: 28px; padding: 25px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .v-title { text-align: center; margin-bottom: 20px; }
+        .v-title h1 { margin: 0; font-size: 40px; color: var(--accent); }
+        .v-title p { margin: 5px 0 0; font-size: 18px; color: var(--highlight); font-weight: 700; }
 
-        /* Çekimler ve Büyük Örnekler */
-        .grid { display: flex; flex-direction: column; gap: 10px; }
-        .row { background: #1e293b; border-radius: 18px; padding: 18px; border: 2px solid transparent; }
-        .row.active { border-color: var(--highlight); background: #0f172a; }
-        .p-label { color: var(--accent); font-size: 11px; font-weight: 900; text-transform: uppercase; margin-bottom: 6px; display: block; }
+        .row { background: var(--row-bg); border-radius: 18px; padding: 15px; border: 2px solid var(--border); margin-bottom: 10px; cursor: pointer; }
+        .row.active { border-color: var(--highlight); background: var(--card); }
+        .p-label { color: var(--accent); font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 4px; display: block; }
         .val-flex { display: flex; justify-content: space-between; align-items: center; }
-        .es { font-size: 22px; font-weight: 800; color: #fff; }
-        .tr { font-size: 18px; color: #94a3b8; }
+        .es { font-size: 20px; font-weight: 800; color: var(--text); }
+        .tr { font-size: 16px; color: var(--accent); opacity: 0.8; }
 
-        .ex-box { 
-            margin-top: 20px; padding: 20px; background: #000; 
-            border: 3px solid var(--highlight); border-radius: 20px;
-            display: none; animation: pop 0.3s ease;
-        }
+        .ex-box { margin-top: 15px; padding: 15px; background: var(--bg); border: 3px solid var(--highlight); border-radius: 18px; display: none; animation: pop 0.3s ease; }
         .row.active .ex-box { display: block; }
-        .ctx { color: var(--accent); font-weight: 900; font-size: 12px; text-transform: uppercase; margin-bottom: 10px; display: block; }
-        .ex-es { font-size: 22px; color: #fff; line-height: 1.4; display: block; margin-bottom: 10px; font-style: italic; }
-        .ex-tr { color: var(--highlight); font-size: 19px; font-weight: 700; display: block; }
+        .ctx { color: var(--accent); font-weight: 900; font-size: 11px; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .ex-es { font-size: 18px; color: var(--text); line-height: 1.4; display: block; margin-bottom: 8px; font-style: italic; }
+        .ex-tr { color: var(--highlight); font-size: 16px; font-weight: 700; display: block; }
 
-        /* Footer */
-        .footer { position: fixed; bottom: 0; width: 100%; padding: 20px; background: linear-gradient(transparent, #000 60%); display: flex; justify-content: center; z-index: 100; }
-        .next-btn { width: 100%; max-width: 400px; padding: 22px; background: var(--highlight); color: #000; border: none; border-radius: 20px; font-size: 22px; font-weight: 900; box-shadow: 0 0 20px rgba(253, 224, 71, 0.4); }
+        /* ALT PANEL */
+        .bottom-panel { position: fixed; bottom: 0; width: 100%; background: var(--bg); border-top: 1px solid var(--border); padding: 10px 15px 25px; z-index: 500; }
+        .search-container { position: relative; margin-bottom: 10px; }
+        .search-input { width: 100%; padding: 12px; background: var(--secondary-bg); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 15px; outline: none; }
+        .search-results { position: absolute; bottom: 55px; left: 0; right: 0; background: var(--card); border: 2px solid var(--accent); border-radius: 12px; max-height: 200px; overflow-y: auto; display: none; }
+        .res-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 14px; }
 
+        .footer-btns { display: flex; gap: 10px; align-items: center; }
+        .next-btn { flex: 2; padding: 12px; background: var(--highlight); color: #000; border: none; border-radius: 10px; font-size: 16px; font-weight: 900; cursor: pointer; }
+        .credits { flex: 1; font-size: 8px; color: var(--text); opacity: 0.5; text-align: right; line-height: 1.2; font-weight: bold; }
+
+        .loader { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; color: var(--accent); font-weight: bold; z-index: 1000; }
         @keyframes pop { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .loader { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; color: var(--accent); font-weight: bold; }
     </style>
 </head>
-<body>
+<body data-theme="dark">
 
-    <div id="loader" class="loader">FİİLLER YÜKLENİYOR...</div>
+    <div id="loader" class="loader">YÜKLENİYOR...</div>
 
-    <div id="top" class="top-panel" style="display:none;">
-        <div class="search-container">
-            <input type="text" id="sInp" class="search-input" placeholder="Fiil ara..." oninput="doSearch(this.value)">
-            <div id="sRes" class="search-results"></div>
+    <div class="app-header">
+        <div class="logo"><span>📖</span><h2>İSPANYOLCA MASTER</h2></div>
+        <select id="themeSelect" onchange="changeTheme(this.value)">
+            <option value="dark">🌙 Koyu</option>
+            <option value="light">☀️ Açık</option>
+            <option value="high-contrast">👁️ Kontrast</option>
+        </select>
+    </div>
+
+    <div id="nav-container" style="display:none;">
+        <div class="main-tabs">
+            <button class="main-tab-btn active" id="tabSimple" onclick="switchGroup('simple')">TEMEL ZAMANLAR</button>
+            <button class="main-tab-btn" id="tabComplex" onclick="switchGroup('complex')">KALIPLAR & KİPLER</button>
         </div>
-        <div class="nav-label">Temel Zamanlar</div>
-        <div class="nav-row" id="rowS"></div>
-        <div class="nav-label">Kalıplar & Kipler</div>
-        <div class="nav-row" id="rowC"></div>
+        <div class="sub-nav"><div class="nav-row" id="subRow"></div></div>
     </div>
 
-    <div id="app">
-        <div class="card-container"><div id="card"></div></div>
-    </div>
+    <div id="app"><div class="card-container"><div id="card"></div></div></div>
 
-    <div class="footer"><button class="next-btn" onclick="rndVerb()">SONRAKİ FİİL (RANDOM)</button></div>
+    <div class="bottom-panel" id="bottom" style="display:none;">
+        <div class="search-container">
+            <div id="sRes" class="search-results"></div>
+            <input type="text" id="sInp" class="search-input" placeholder="Fiil ara..." oninput="doSearch(this.value)">
+        </div>
+        <div class="footer-btns">
+            <button class="next-btn" onclick="rndVerb()">SONRAKİ FİİL</button>
+            <div class="credits">DESIGNED BY<br><span style="color:var(--accent)">SERHAT KUT</span></div>
+        </div>
+    </div>
 
 <script>
     const TSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQdKhRHcoqhnlbBvPiGFSh1bHLQJyhj7bi8geY1a9jtYDke0ph_65uNp_VwubpaqBVvia_LzsTQsurc/pub?output=tsv';
-    
-    let verbs = []; let curV = -1; let curT = 'pres';
+    let verbs = []; let curV = -1; let curT = 'pres'; let curGroup = 'simple';
     const pers = ["Yo", "Tú", "Él/Ella", "Nosotros", "Vosotros", "Ellos/Ellas"];
 
-    // Sütun İndeksleri (AK kolonuna kadar tam uyumlu)
     const tSimp = [
         { id: 'pres', n: 'Presente', t: 'Şimdiki', e: 11, tr: 12, ex: 30 },
         { id: 'perf', n: 'Perfecto', t: 'Y. Geçmiş', e: 5, tr: 6, ex: 27 },
@@ -99,52 +133,70 @@
         { id: 'fut', n: 'Futuro', t: 'Gelecek', e: 17, tr: 18, ex: 31 }
     ];
     const tComp = [
-        { id: 'ira', n: 'Ir a...', t: 'Voy a...', e: 15, tr: 16, ex: 32 }, // AG (32)
-        { id: 'estar', n: 'Estar -ndo', t: 'Şu An', e: 13, tr: 14, ex: 33 }, // AH (33)
-        { id: 'acabar', n: 'Acabar de', t: 'Az Önce', e: 19, tr: 20, ex: 34 }, // AI (34)
-        { id: 'tener', n: 'Tengo que', t: 'Zorunlu', e: 21, tr: 22, ex: 35 }, // AJ (35)
-        { id: 'subj', n: 'Subjuntivo', t: 'Dilek-Şart', e: 25, tr: 26, ex: 36 } // AK (36)
+        { id: 'ira', n: 'Ir a...', t: 'Voy a...', e: 15, tr: 16, ex: 32 },
+        { id: 'estar', n: 'Estar -ndo', t: 'Şu An', e: 13, tr: 14, ex: 33 },
+        { id: 'acabar', n: 'Acabar de', t: 'Az Önce', e: 19, tr: 20, ex: 34 },
+        { id: 'tener', n: 'Tengo que', t: 'Zorunlu', e: 21, tr: 22, ex: 35 },
+        { id: 'subj', n: 'Subjuntivo', t: 'Dilek-Şart', e: 25, tr: 26, ex: 36 }
     ];
-    const tAll = [...tSimp, ...tComp];
 
     async function start() {
+        // Kayıtlı temayı yükle
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        changeTheme(savedTheme);
+        document.getElementById('themeSelect').value = savedTheme;
+
         try {
             const r = await fetch(TSV); const txt = await r.text();
             const rows = txt.split('\r\n').filter(l => l.trim() !== "");
             verbs = rows.slice(1).map((l, i) => {
                 const c = l.split('\t');
                 const v = { id: i, es: c[0], tr: c[4] || "?" };
-                tAll.forEach(t => v[t.id] = { es: (c[t.e]||"").split(';'), tr: (c[t.tr]||"").split(';'), ex: (c[t.ex]||"").split(';') });
+                [...tSimp, ...tComp].forEach(t => v[t.id] = { es: (c[t.e]||"").split(';'), tr: (c[t.tr]||"").split(';'), ex: (c[t.ex]||"").split(';') });
                 return v;
             });
             document.getElementById('loader').style.display='none';
-            document.getElementById('top').style.display='block';
+            document.getElementById('nav-container').style.display='block';
+            document.getElementById('bottom').style.display='block';
             document.getElementById('app').style.display='block';
-            buildNav(); rndVerb();
-        } catch(e) { document.getElementById('loader').innerText="BAĞLANTI HATASI!"; }
+            switchGroup('simple'); rndVerb();
+        } catch(e) { console.error(e); }
     }
 
-    function buildNav() {
-        const render = (id, list) => {
-            document.getElementById(id).innerHTML = list.map(t => `
-                <div class="t-btn ${t.id==curT?'active':''}" id="b-${t.id}" onclick="setT('${t.id}')">
-                    <span>${t.n}</span><small>${t.t}</small>
-                </div>`).join('');
-        };
-        render('rowS', tSimp); render('rowC', tComp);
+    function changeTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+    }
+
+    function switchGroup(g) {
+        curGroup = g;
+        document.getElementById('tabSimple').classList.toggle('active', g === 'simple');
+        document.getElementById('tabComplex').classList.toggle('active', g === 'complex');
+        const list = g === 'simple' ? tSimp : tComp;
+        curT = list[0].id;
+        document.getElementById('subRow').innerHTML = list.map(t => `
+            <div class="t-btn ${t.id==curT?'active':''}" id="b-${t.id}" onclick="setT('${t.id}')">
+                <span>${t.n}</span><small>${t.t}</small>
+            </div>`).join('');
+        render();
+    }
+
+    function setT(id) {
+        curT = id; document.querySelectorAll('.t-btn').forEach(b=>b.classList.remove('active'));
+        const btn = document.getElementById(`b-${id}`); if(btn) btn.classList.add('active');
+        render();
     }
 
     function doSearch(v) {
         const r = document.getElementById('sRes');
         if(!v) { r.style.display='none'; return; }
-        const f = verbs.filter(x => x.es.toLowerCase().includes(v.toLowerCase())).slice(0,8);
-        r.innerHTML = f.map(x => `<div class="res-item" onclick="selV(${x.id})"><b>${x.es}</b><span style="color:#94a3b8">${x.tr}</span></div>`).join('');
+        const f = verbs.filter(x => x.es.toLowerCase().includes(v.toLowerCase())).slice(0,10);
+        r.innerHTML = f.map(x => `<div class="res-item" onclick="selV(${x.id})"><b>${x.es}</b><span>${x.tr}</span></div>`).join('');
         r.style.display = f.length?'block':'none';
     }
 
     function selV(id) { curV = verbs.findIndex(x=>x.id==id); document.getElementById('sRes').style.display='none'; document.getElementById('sInp').value=""; render(); }
     function rndVerb() { curV = Math.floor(Math.random()*verbs.length); render(); }
-    function setT(id) { curT = id; document.querySelectorAll('.t-btn').forEach(b=>b.classList.remove('active')); document.getElementById(`b-${id}`).classList.add('active'); render(); }
 
     function render() {
         const v = verbs[curV]; if(!v) return;
@@ -157,6 +209,7 @@
                 ${bits.length>=2 ? `<div class="ex-box"><span class="ctx">${bits[0]}</span><span class="ex-es">${bits[1]}</span><span class="ex-tr">${bits[2]||""}</span></div>`:''}
             </div>`;
         }).join('');
+        document.getElementById('app').scrollTop = 0;
     }
 
     function toggleRow(el) {
