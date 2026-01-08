@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>İspanyolca Master v25</title>
+    <title>İspanyolca Master v26</title>
 
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 750 500%22><rect width=%22750%22 height=%22500%22 fill=%22%23c60b1e%22/><rect width=%22750%22 height=%22250%22 y=%22125%22 fill=%22%23ffc400%22/></svg>">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 750 500%22><rect width=%22750%22 height=%22500%22 fill=%22%23c60b1e%22/><rect width=%22750%22 height=%22250%22 y=%22125%22 fill=%22%23ffc400%22/></svg>">
     
     <style>
         :root {
-            --sat: env(safe-area-inset-top);
-            --sab: env(safe-area-inset-bottom);
+            --sat: env(safe-area-inset-top); --sab: env(safe-area-inset-bottom);
             --bg: #000; --card: #0f172a; --accent: #22d3ee;
             --text: #fff; --border: #334155; --highlight: #fde047;
             --secondary-bg: #1e293b; --row-bg: #1e293b;
@@ -59,37 +59,43 @@
         .ex-box { margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-left: 3px solid var(--highlight); border-radius: 8px; display: none; flex-direction: column; gap: 5px; }
         .row.active .ex-box { display: flex; }
 
-        /* MATRIX MODAL - STICKY GÜNCELLEMESİ */
+        /* MATRIX MODAL & TABLO DÜZENİ */
         #matrixModal { position: fixed; inset: 0; background: var(--modal-bg); z-index: 1000; display: none; flex-direction: column; padding: calc(10px + var(--sat)) 0 calc(10px + var(--sab)); }
         .matrix-header { display: flex; justify-content: space-between; align-items: center; padding: 0 15px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
         
-        /* Sabit Kalacak Cümle Alanı */
-        #matrixExDisplay { padding: 10px 15px; background: var(--secondary-bg); flex-shrink: 0; border-bottom: 1px solid var(--accent); empty-cells: hide; }
+        #matrixExDisplay { padding: 12px 15px; background: var(--secondary-bg); flex-shrink: 0; border-bottom: 1px solid var(--accent); min-height: 20px; }
         
-        /* Kaydırılabilir Tablo Alanı */
         .matrix-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 15px; }
         
-        table { width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; }
-        th { background: var(--accent); color: #000; padding: 8px 4px; text-align: left; position: sticky; top: 0; z-index: 5; }
-        th small { display: block; font-size: 8px; font-weight: 900; }
-        td { border-bottom: 1px solid var(--border); padding: 12px 4px; }
-        .td-p { font-weight: 900; color: var(--accent); width: 45px; }
-        .td-v { color: var(--text); cursor: pointer; font-size: 12px; }
+        /* Matris Tablo - Kaydırma ve Otomatik Genişlik */
+        .table-scroll { overflow-x: auto; margin-top: 10px; width: 100%; border-radius: 10px; border: 1px solid var(--border); }
+        table { border-collapse: collapse; min-width: 100%; width: max-content; }
+        th { background: var(--accent); color: #000; padding: 10px 12px; text-align: left; position: sticky; top: 0; z-index: 5; border-right: 1px solid rgba(0,0,0,0.1); }
+        th small { display: block; font-size: 8px; font-weight: 900; line-height: 1; margin-top: 2px; }
+        
+        td { border-bottom: 1px solid var(--border); padding: 12px; border-right: 1px solid rgba(255,255,255,0.05); }
+        .td-p { font-weight: 900; color: var(--accent); width: 60px; font-size: 11px; text-transform: uppercase; }
+        
+        /* Hücre İçi İspanyolca-Türkçe Düzeni */
+        .cell-content { display: flex; flex-direction: column; gap: 2px; }
+        .td-es { font-size: 13px; font-weight: 800; color: var(--text); white-space: nowrap; }
+        .td-tr { font-size: 10px; opacity: 0.5; color: var(--text); font-weight: 500; }
 
         .close-matrix { background: var(--highlight); color: #000; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 900; }
 
         .bottom-panel { flex-shrink: 0; background: var(--bg); border-top: 1px solid var(--border); padding: 10px 15px calc(10px + var(--sab)); }
         .next-btn { width: 100%; padding: 15px; background: var(--highlight); color: #000; border: none; border-radius: 12px; font-weight: 900; }
         .search-input { width: 100%; padding: 12px; background: var(--secondary-bg); border: 1px solid var(--border); border-radius: 10px; color: var(--text); margin-top: 10px; outline: none; }
-        .search-results { position: absolute; bottom: 100%; left: 15px; right: 15px; background: var(--card); border: 2px solid var(--accent); border-radius: 12px; max-height: 40vh; overflow-y: auto; display: none; }
+        .search-results { position: absolute; bottom: 100%; left: 15px; right: 15px; background: var(--card); border: 2px solid var(--accent); border-radius: 12px; max-height: 40vh; overflow-y: auto; display: none; z-index: 1001; }
         .res-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
 
         .loader { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; color: var(--accent); z-index: 2000; }
+        @keyframes pop { from { transform: scale(0.98); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body data-theme="dark">
 
-    <div id="loader" class="loader">YÜKLENİYOR...</div>
+    <div id="loader" class="loader">VERİLER YÜKLENİYOR...</div>
 
     <div id="matrixModal">
         <div class="matrix-header">
@@ -132,14 +138,14 @@
     const pers = ["Yo", "Tú", "Él/Ella", "Nosotros", "Vosotros", "Ellos/Ellas"];
 
     const tSimp = [
-        { id: 'pres', n: 'Presente', t: 'Şimdiki Zaman', e: 11, tr: 12, ex: 30 },
+        { id: 'pres', n: 'Presente', t: 'Şimdiki', e: 11, tr: 12, ex: 30 },
         { id: 'perf', n: 'Pret. Perfecto', t: 'Yakın Geçmiş', e: 5, tr: 6, ex: 27 },
         { id: 'indef', n: 'Pret. Indefinido', t: 'Dili Geçmiş', e: 7, tr: 8, ex: 28 },
         { id: 'imp', n: 'Pret. Imperfecto', t: 'Sürekli Geçmiş', e: 9, tr: 10, ex: 29 },
-        { id: 'fut', n: 'Futuro', t: 'Gelecek Zaman', e: 17, tr: 18, ex: 31 }
+        { id: 'fut', n: 'Futuro', t: 'Gelecek', e: 17, tr: 18, ex: 31 }
     ];
     const tComp = [
-        { id: 'ira', n: 'Ir a + Inf.', t: 'Planlı Gelecek', e: 15, tr: 16, ex: 32 },
+        { id: 'ira', n: 'Ir a', t: 'Planlı Gel.', e: 15, tr: 16, ex: 32 },
         { id: 'estar', n: 'Estar + Ger.', t: 'Şu An Yapıyor', e: 13, tr: 14, ex: 33 },
         { id: 'acabar', n: 'Acabar de', t: 'Henüz Yaptı', e: 19, tr: 20, ex: 34 },
         { id: 'tener', n: 'Tener que', t: 'Zorunluluk', e: 21, tr: 22, ex: 35 },
@@ -176,15 +182,19 @@
         if(!show) { m.style.display = 'none'; return; }
         const v = verbs[curV];
         document.getElementById('mVerbTitle').innerText = v.es.toUpperCase();
-        document.getElementById('matrixExDisplay').innerHTML = `<div style="text-align:center; opacity:0.5; font-size:11px;">Detay için çekime dokun.</div>`;
+        document.getElementById('matrixExDisplay').innerHTML = `<div style="text-align:center; opacity:0.5; font-size:11px;">Örnek için çekime dokun.</div>`;
         
         const buildTable = (title, list) => {
-            let h = `<div style="margin-bottom:25px;"><div style="color:var(--highlight); font-size:12px; font-weight:900; margin-bottom:10px;">${title}</div><div style="overflow-x:auto;"><table><tr><th style="width:50px">Zamir</th>`;
+            let h = `<div style="margin-bottom:30px;"><div style="color:var(--highlight); font-size:12px; font-weight:900; margin-bottom:8px;">${title}</div><div class="table-scroll"><table><tr><th style="width:65px">Şahıs</th>`;
             list.forEach(t => h += `<th>${t.n}<small>${t.t}</small></th>`);
             h += `</tr>`;
             pers.forEach((p, pi) => {
                 h += `<tr><td class="td-p">${p}</td>`;
-                list.forEach(t => h += `<td class="td-v" onclick="showMatrixEx('${t.id}', ${pi})">${v[t.id].es[pi] || '-'}</td>`);
+                list.forEach(t => {
+                    const esWord = v[t.id].es[pi] || '-';
+                    const trWord = v[t.id].tr[pi] || '-';
+                    h += `<td onclick="showMatrixEx('${t.id}', ${pi})"><div class="cell-content"><span class="td-es">${esWord}</span><span class="td-tr">${trWord}</span></div></td>`;
+                });
                 h += `</tr>`;
             });
             h += `</table></div></div>`;
