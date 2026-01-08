@@ -2,8 +2,8 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>İspanyolca Kartlar Master v13</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>İspanyolca Master v14</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
     <style>
         :root {
@@ -23,68 +23,91 @@
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        body { 
+            font-family: -apple-system, system-ui, sans-serif; 
+            background: var(--bg); color: var(--text); margin: 0; 
+            /* Mobil Tarayıcı Fix */
+            height: 100vh; height: 100dvh; 
+            display: flex; flex-direction: column; overflow: hidden;
+            padding-top: env(safe-area-inset-top);
+        }
 
-        .app-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background: var(--bg); border-bottom: 1px solid var(--border); }
+        /* Üst Header */
+        .app-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 15px; background: var(--bg); border-bottom: 1px solid var(--border); flex-shrink: 0; }
         .logo { display: flex; align-items: center; gap: 8px; }
-        .logo h2 { margin: 0; font-size: 16px; color: var(--accent); letter-spacing: 1px; }
-        #themeSelect { background: var(--secondary-bg); color: var(--text); border: 1px solid var(--border); padding: 5px; border-radius: 8px; font-size: 12px; }
+        .logo h2 { margin: 0; font-size: 14px; color: var(--accent); letter-spacing: 1px; }
+        #themeSelect { background: var(--secondary-bg); color: var(--text); border: 1px solid var(--border); padding: 4px; border-radius: 8px; font-size: 11px; }
 
+        /* Üst Navigasyon */
+        .nav-wrapper { flex-shrink: 0; background: var(--bg); }
         .main-tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); }
-        .main-tab-btn { flex: 1; padding: 12px; border: none; background: transparent; color: var(--text); opacity: 0.6; font-weight: 900; font-size: 10px; text-transform: uppercase; cursor: pointer; }
+        .main-tab-btn { flex: 1; padding: 10px; border: none; background: transparent; color: var(--text); opacity: 0.6; font-weight: 800; font-size: 10px; text-transform: uppercase; }
         .main-tab-btn.active { opacity: 1; color: var(--accent); border-bottom: 3px solid var(--accent); }
 
-        .sub-nav { background: var(--bg); padding: 10px 0; border-bottom: 2px solid var(--accent); }
+        .sub-nav { padding: 8px 0; border-bottom: 2px solid var(--accent); }
         .nav-row { display: flex; overflow-x: auto; gap: 8px; padding: 0 15px; scrollbar-width: none; }
         .nav-row::-webkit-scrollbar { display: none; }
         
-        .t-btn { display: flex; flex-direction: column; align-items: center; min-width: 100px; padding: 8px; background: var(--card); border: 2px solid var(--border); border-radius: 12px; cursor: pointer; }
+        .t-btn { display: flex; flex-direction: column; align-items: center; min-width: 90px; padding: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; }
         .t-btn.active { background: var(--accent); border-color: var(--text); }
-        .t-btn span { color: var(--text); font-size: 12px; font-weight: 800; }
+        .t-btn span { color: var(--text); font-size: 11px; font-weight: 700; }
         .t-btn small { color: var(--accent); font-size: 8px; text-transform: uppercase; }
-        .t-btn.active span, .t-btn.active small { color: var(--bg); font-weight: 900; }
+        .t-btn.active span, .t-btn.active small { color: var(--bg); font-weight: 800; }
 
-        #app { flex: 1; overflow-y: auto; padding: 15px; }
-        .card-container { max-width: 500px; margin: 0 auto; padding-bottom: 200px; }
-        .v-card { background: var(--card); border-radius: 28px; padding: 25px; border: 1px solid var(--border); }
-        .v-title h1 { margin: 0; font-size: 40px; color: var(--accent); text-align: center; }
-        .v-title p { margin: 5px 0 20px; font-size: 18px; color: var(--highlight); font-weight: 700; text-align: center; }
+        /* Ana İçerik (Sadece Burası Kayar) */
+        #app { flex: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
+        .card-container { max-width: 500px; margin: 0 auto; padding-bottom: 40px; }
+        .v-card { background: var(--card); border-radius: 24px; padding: 20px; border: 1px solid var(--border); }
+        .v-title h1 { margin: 0; font-size: 36px; color: var(--accent); text-align: center; }
+        .v-title p { margin: 4px 0 15px; font-size: 16px; color: var(--highlight); font-weight: 700; text-align: center; }
 
-        .row { background: var(--row-bg); border-radius: 18px; padding: 15px; border: 2px solid var(--border); margin-bottom: 10px; cursor: pointer; }
+        .row { background: var(--row-bg); border-radius: 16px; padding: 12px; border: 1px solid var(--border); margin-bottom: 8px; }
         .row.active { border-color: var(--highlight); background: var(--card); }
-        .p-label { color: var(--accent); font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 4px; display: block; }
+        .p-label { color: var(--accent); font-size: 9px; font-weight: 900; text-transform: uppercase; margin-bottom: 2px; display: block; }
         .val-flex { display: flex; justify-content: space-between; align-items: center; }
-        .es { font-size: 20px; font-weight: 800; }
-        .tr { font-size: 16px; opacity: 0.7; }
+        .es { font-size: 18px; font-weight: 800; }
+        .tr { font-size: 15px; opacity: 0.7; }
 
-        .ex-box { margin-top: 15px; padding: 20px; background: var(--bg); border: 3px solid var(--highlight); border-radius: 18px; display: none; }
-        .row.active .ex-box { display: block; animation: pop 0.3s ease; }
-        .ctx { color: var(--accent); font-weight: 900; font-size: 11px; text-transform: uppercase; margin-bottom: 8px; display: block; }
-        .ex-es { font-size: 18px; font-style: italic; display: block; margin-bottom: 8px; line-height: 1.4; }
-        .ex-tr { color: var(--highlight); font-size: 16px; font-weight: 700; display: block; }
+        .ex-box { margin-top: 12px; padding: 15px; background: var(--bg); border: 2px solid var(--highlight); border-radius: 14px; display: none; animation: pop 0.2s ease; }
+        .row.active .ex-box { display: block; }
+        .ctx { color: var(--accent); font-weight: 900; font-size: 10px; margin-bottom: 5px; display: block; }
+        .ex-es { font-size: 17px; font-style: italic; display: block; margin-bottom: 5px; line-height: 1.3; }
+        .ex-tr { color: var(--highlight); font-size: 15px; font-weight: 700; display: block; }
 
-        .bottom-panel { position: fixed; bottom: 0; width: 100%; background: var(--bg); border-top: 1px solid var(--border); padding: 10px 15px 30px; z-index: 500; }
-        .search-container { position: relative; margin-bottom: 10px; }
-        .search-input { width: 100%; padding: 12px; background: var(--secondary-bg); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 15px; outline: none; }
+        /* ALT PANEL (Sabit & Search En Altta) */
+        .bottom-panel { 
+            flex-shrink: 0;
+            background: var(--bg); 
+            border-top: 1px solid var(--border); 
+            padding: 10px 15px calc(10px + env(safe-area-inset-bottom)); 
+            z-index: 500;
+        }
         
-        .search-results { position: absolute; bottom: 55px; left: 0; right: 0; background: var(--card); border: 2px solid var(--accent); border-radius: 12px; max-height: 200px; overflow-y: auto; display: none; }
+        .footer-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .next-btn { flex: 1; padding: 10px; background: var(--highlight); color: #000; border: none; border-radius: 10px; font-size: 14px; font-weight: 900; }
+        .credits { margin-left: 15px; font-size: 8px; opacity: 0.5; text-align: right; line-height: 1; font-weight: bold; }
+
+        .search-container { position: relative; }
+        .search-input { width: 100%; padding: 10px; background: var(--secondary-bg); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; outline: none; }
+        
+        /* Arama Sonuçları Yukarı Açılsın */
+        .search-results { 
+            position: absolute; bottom: 100%; left: 0; right: 0; 
+            background: var(--card); border: 2px solid var(--accent); 
+            border-radius: 12px; max-height: 50dvh; overflow-y: auto; 
+            display: none; box-shadow: 0 -10px 30px rgba(0,0,0,0.8); margin-bottom: 10px;
+        }
         .res-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         .res-sub { font-size: 10px; color: var(--accent); opacity: 0.8; }
 
-        .not-found-box { padding: 20px; text-align: center; }
-        .email-btn { margin-top: 10px; background: var(--accent); color: #000; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 900; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 13px; }
-
-        .footer-btns { display: flex; gap: 10px; align-items: center; }
-        .next-btn { flex: 2; padding: 12px; background: var(--highlight); color: #000; border: none; border-radius: 10px; font-size: 16px; font-weight: 900; cursor: pointer; }
-        .credits { flex: 1; font-size: 8px; opacity: 0.5; text-align: right; font-weight: bold; }
-
         .loader { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; color: var(--accent); font-weight: bold; z-index: 1000; }
-        @keyframes pop { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes pop { from { transform: scale(0.98); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body data-theme="dark">
 
-    <div id="loader" class="loader">FİİLLER YÜKLENİYOR...</div>
+    <div id="loader" class="loader">YÜKLENİYOR...</div>
 
     <div class="app-header">
         <div class="logo"><span>📖</span><h2>İSPANYOLCA MASTER</h2></div>
@@ -95,7 +118,7 @@
         </select>
     </div>
 
-    <div id="nav-container" style="display:none;">
+    <div id="nav-container" class="nav-wrapper" style="display:none;">
         <div class="main-tabs">
             <button class="main-tab-btn active" id="tabSimple" onclick="switchGroup('simple')">TEMEL</button>
             <button class="main-tab-btn" id="tabComplex" onclick="switchGroup('complex')">KALIPLAR</button>
@@ -106,13 +129,13 @@
     <div id="app"><div class="card-container"><div id="card"></div></div></div>
 
     <div class="bottom-panel" id="bottom" style="display:none;">
+        <div class="footer-top">
+            <button class="next-btn" onclick="rndVerb()">SONRAKİ FİİL (RANDOM)</button>
+            <div class="credits">DESIGNED BY<br><span style="color:var(--accent)">SERHAT KUT</span></div>
+        </div>
         <div class="search-container">
             <div id="sRes" class="search-results"></div>
-            <input type="text" id="sInp" class="search-input" placeholder="Fiil veya çekim ara (örn: hice)..." oninput="doSearch(this.value)">
-        </div>
-        <div class="footer-btns">
-            <button class="next-btn" onclick="rndVerb()">SONRAKİ FİİL</button>
-            <div class="credits">DESIGNED BY<br><span style="color:var(--accent)">SERHAT KUT</span></div>
+            <input type="text" id="sInp" class="search-input" placeholder="Fiil/Çekim ara (örn: hice)..." oninput="doSearch(this.value)">
         </div>
     </div>
 
@@ -137,7 +160,6 @@
         { id: 'tener', n: 'Tengo que', t: 'Zorunlu', e: 21, tr: 22, ex: 35 },
         { id: 'subj', n: 'Subjuntivo', t: 'Dilek-Şart', e: 25, tr: 26, ex: 36 }
     ];
-    const allTenses = [...tSimp, ...tComp];
 
     async function start() {
         const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -150,7 +172,7 @@
             verbs = rows.slice(1).map((l, i) => {
                 const c = l.split('\t');
                 const v = { id: i, es: c[0], tr: c[4] || "?" };
-                allTenses.forEach(t => v[t.id] = { es: (c[t.e]||"").split(';'), tr: (c[t.tr]||"").split(';'), ex: (c[t.ex]||"").split(';') });
+                [...tSimp, ...tComp].forEach(t => v[t.id] = { es: (c[t.e]||"").split(';'), tr: (c[t.tr]||"").split(';'), ex: (c[t.ex]||"").split(';') });
                 return v;
             });
             document.getElementById('loader').style.display='none';
@@ -163,18 +185,13 @@
 
     function changeTheme(theme) { document.body.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); }
 
-    // AKILLI ARAMA FONKSİYONU
     function doSearch(v) {
         const r = document.getElementById('sRes');
         if(!v) { r.style.display='none'; return; }
         const query = v.toLowerCase();
-        
-        // Sadece fiil isminde değil, tüm çekimlerde arama yap
         const f = verbs.filter(verb => {
-            // Fiil isminde var mı?
             if (verb.es.toLowerCase().includes(query)) return true;
-            // Çekimlerin herhangi birinde var mı?
-            return allTenses.some(tense => 
+            return [...tSimp, ...tComp].some(tense => 
                 verb[tense.id].es.some(conj => conj.toLowerCase().includes(query))
             );
         }).slice(0, 10);
@@ -182,15 +199,11 @@
         if (f.length > 0) {
             r.innerHTML = f.map(x => `
                 <div class="res-item" onclick="selV(${x.id})">
-                    <div>
-                        <b>${x.es}</b><br>
-                        <span class="res-sub">${x.tr}</span>
-                    </div>
+                    <div><b>${x.es}</b><br><span class="res-sub">${x.tr}</span></div>
                     <span style="font-size:18px">➔</span>
                 </div>`).join('');
         } else {
-            r.innerHTML = `<div class="not-found-box"><p style="font-size:14px; margin:0;">"${v}" bulunamadı.</p>
-                <a class="email-btn" href="mailto:${MY_EMAIL}?subject=Eksik Fiil&body='${v}' eksik.">✉️ Serhat'a Bildir</a></div>`;
+            r.innerHTML = `<div style="padding:15px;text-align:center"><a style="color:var(--accent);text-decoration:none;font-size:12px;" href="mailto:${MY_EMAIL}?subject=Eksik Fiil&body='${v}' ekler misin?">✉️ Serhat'a Bildir</a></div>`;
         }
         r.style.display = 'block';
     }
@@ -201,19 +214,11 @@
         document.getElementById('tabComplex').classList.toggle('active', g === 'complex');
         const list = g === 'simple' ? tSimp : tComp;
         curT = list[0].id;
-        document.getElementById('subRow').innerHTML = list.map(t => `
-            <div class="t-btn ${t.id==curT?'active':''}" id="b-${t.id}" onclick="setT('${t.id}')">
-                <span>${t.n}</span><small>${t.t}</small>
-            </div>`).join('');
+        document.getElementById('subRow').innerHTML = list.map(t => `<div class="t-btn ${t.id==curT?'active':''}" id="b-${t.id}" onclick="setT('${t.id}')"><span>${t.n}</span><small>${t.t}</small></div>`).join('');
         render();
     }
 
-    function setT(id) {
-        curT = id; document.querySelectorAll('.t-btn').forEach(b=>b.classList.remove('active'));
-        const btn = document.getElementById(`b-${id}`); if(btn) btn.classList.add('active');
-        render();
-    }
-
+    function setT(id) { curT = id; document.querySelectorAll('.t-btn').forEach(b=>b.classList.remove('active')); const btn = document.getElementById(`b-${id}`); if(btn) btn.classList.add('active'); render(); }
     function selV(id) { curV = verbs.findIndex(x=>x.id==id); document.getElementById('sRes').style.display='none'; document.getElementById('sInp').value=""; render(); }
     function rndVerb() { curV = Math.floor(Math.random()*verbs.length); render(); }
 
@@ -222,19 +227,9 @@
         document.getElementById('card').innerHTML = `<div class="v-card"><div class="v-title"><h1>${v.es}</h1><p>${v.tr}</p></div><div id="grid" class="grid"></div></div>`;
         const tD = v[curT]; document.getElementById('grid').innerHTML = pers.map((p, i) => {
             const bits = (tD.ex[i] || "").split(':');
-            return `<div class="row" onclick="this.classList.toggle('active')">
-                <span class="p-label">${p}</span>
-                <div class="val-flex"><span class="es">${tD.es[i]||"-"}</span><span class="tr">${tD.tr[i]||"-"}</span></div>
-                ${bits.length>=2 ? `<div class="ex-box"><span class="ctx">${bits[0]}</span><span class="ex-es">${bits[1]}</span><span class="ex-tr">${bits[2]||""}</span></div>`:''}
-            </div>`;
+            return `<div class="row" onclick="this.classList.toggle('active')"><span class="p-label">${p}</span><div class="val-flex"><span class="es">${tD.es[i]||"-"}</span><span class="tr">${tD.tr[i]||"-"}</span></div>${bits.length>=2 ? `<div class="ex-box"><span class="ctx">${bits[0]}</span><span class="ex-es">${bits[1]}</span><span class="ex-tr">${bits[2]||""}</span></div>`:''}</div>`;
         }).join('');
         document.getElementById('app').scrollTop = 0;
-    }
-
-    function toggleRow(el) {
-        const active = el.classList.contains('active');
-        document.querySelectorAll('.row').forEach(r => r.classList.remove('active'));
-        if(!active) el.classList.add('active');
     }
     start();
 </script>
