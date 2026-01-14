@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Vocab Master v4.2 - Pro</title>
+    <title>Vocab Master v4.3 - Autoplay Pro</title>
     
-    <!-- Mobil Uygulama Ayarları -->
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23fbbf24%22/><text y=%22.75em%22 x=%225%22 font-size=%2270%22>🇪🇸</text></svg>">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Vocab Master">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -31,35 +29,22 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-pop { animation: fadeIn 0.3s ease-out forwards; }
         
-        /* Dropdown Animasyonu */
-        .dropdown-content { 
-            max-height: 0; 
-            overflow: hidden; 
-            transition: max-height 0.3s ease-out, opacity 0.2s; 
-            opacity: 0;
-            pointer-events: none;
-        }
-        .dropdown-open .dropdown-content { 
-            max-height: 60vh; 
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .dropdown-content { max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out; opacity: 0; pointer-events: none; }
+        .dropdown-open .dropdown-content { max-height: 60vh; opacity: 1; pointer-events: auto; }
 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        /* Progress bar for autoplay */
+        .progress-bar { height: 3px; background: #fbbf24; width: 0%; transition: width linear; }
     </style>
 </head>
 <body class="flex flex-col">
 
-    <!-- LOADER / GİRİŞ -->
+    <!-- LOADER -->
     <div id="loader" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center flex-col p-10 text-center">
         <div class="w-12 h-12 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-6"></div>
-        <p id="loadStatus" class="text-amber-400 font-black text-xs tracking-widest uppercase italic">Veriler Hazırlanıyor...</p>
-        
+        <p class="text-amber-400 font-black text-xs tracking-widest uppercase italic">Zihin Yükleniyor...</p>
         <div id="manualUI" class="hidden w-full max-w-sm mt-8 animate-pop">
             <textarea id="manualInput" class="w-full h-32 bg-slate-800 border border-slate-700 rounded-2xl p-4 text-[10px] text-slate-300 mb-4 focus:outline-none focus:border-amber-400" placeholder="Tablo verilerini buraya yapıştırın..."></textarea>
-            <button onclick="loadManual()" class="w-full bg-amber-400 text-slate-900 py-4 rounded-xl font-black text-xs uppercase shadow-lg active:scale-95 transition-transform">Başlat</button>
+            <button onclick="loadManual()" class="w-full bg-amber-400 text-slate-900 py-4 rounded-xl font-black text-xs uppercase shadow-lg active:scale-95">Başlat</button>
         </div>
     </div>
 
@@ -69,39 +54,41 @@
             <span class="text-2xl">🇪🇸</span>
             <div class="flex flex-col">
                 <h1 class="text-[10px] font-black text-amber-400 uppercase tracking-tighter leading-none">Vocab Master</h1>
-                <p class="text-[7px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">v4.2 Stable</p>
+                <p class="text-[7px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">v4.3 Autoplay</p>
             </div>
         </div>
-        <div id="stats" class="text-[9px] bg-slate-800 px-3 py-1 rounded-full text-slate-400 font-bold border border-slate-700 tracking-tighter">0 / 0</div>
+        <div id="stats" class="text-[9px] bg-slate-800 px-3 py-1 rounded-full text-slate-400 font-bold border border-slate-700">0 / 0</div>
     </header>
 
-    <!-- ÇOKLU KATEGORİ SEÇİMİ -->
+    <!-- DROPDOWN FILTER -->
     <div id="filterSection" class="relative z-30 bg-slate-900/50 border-b border-slate-800">
-        <button onclick="toggleDropdown()" class="w-full p-4 flex items-center justify-between text-left active:bg-slate-800 transition-colors">
+        <button onclick="toggleDropdown()" class="w-full p-4 flex items-center justify-between text-left">
             <div class="flex flex-col">
-                <span class="text-[8px] text-slate-500 font-black uppercase tracking-widest">Kategori Seçimi (Çoklu)</span>
+                <span class="text-[8px] text-slate-500 font-black uppercase tracking-widest leading-none mb-1">Filtrele</span>
                 <span id="selectedCatsLabel" class="text-[10px] text-amber-400 font-black uppercase truncate max-w-[70vw]">Tüm Kategoriler</span>
             </div>
-            <span id="dropIcon" class="text-slate-500 transition-transform duration-300">▼</span>
+            <span id="dropIcon" class="text-slate-500 text-xs transition-transform duration-300">▼</span>
         </button>
         <div id="dropdownMenu" class="dropdown-content absolute w-full bg-slate-800 border-b border-slate-700 shadow-2xl z-50">
-            <div id="catList" class="grid grid-cols-2 gap-2 p-4 max-h-[40vh] overflow-y-auto custom-scroll">
-                <!-- Kategoriler JS ile dolacak -->
-            </div>
+            <div id="catList" class="grid grid-cols-2 gap-2 p-4 max-h-[40vh] overflow-y-auto no-scrollbar"></div>
             <div class="p-4 bg-slate-900/50 flex gap-2">
                 <button onclick="selectAll(true)" class="flex-1 text-[8px] font-black uppercase text-slate-400 border border-slate-700 py-2 rounded-lg">Hepsini Seç</button>
-                <button onclick="selectAll(false)" class="flex-1 text-[8px] font-black uppercase text-slate-400 border border-slate-700 py-2 rounded-lg">Temizle</button>
-                <button onclick="applyFilters()" class="flex-[2] bg-amber-400 text-slate-900 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest active:scale-95 transition-transform">Filtrele</button>
+                <button onclick="applyFilters()" class="flex-[2] bg-amber-400 text-slate-900 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest">Seçilenleri Çalıştır</button>
             </div>
         </div>
     </div>
 
-    <!-- MAIN KART -->
+    <!-- AUTOPLAY PROGRESS -->
+    <div class="w-full bg-slate-800 h-[3px]">
+        <div id="autoProgressBar" class="progress-bar"></div>
+    </div>
+
+    <!-- MAIN CARD -->
     <main id="app" class="flex-1 flex flex-col items-center justify-center p-4">
         <div id="cardWrapper" class="relative w-full max-w-sm aspect-[3/4] perspective-1000 hidden">
-            <div id="vocabCard" class="card-inner w-full h-full relative cursor-pointer" onclick="flipCard()">
+            <div id="vocabCard" class="card-inner w-full h-full relative cursor-pointer" onclick="handleCardClick()">
                 
-                <!-- ÖN YÜZ -->
+                <!-- FRONT -->
                 <div class="card-front bg-slate-800 border border-slate-700 shadow-2xl overflow-hidden flex flex-col">
                     <div class="flex-1 bg-black relative flex items-center justify-center overflow-hidden">
                         <img id="vImg" src="" class="w-full h-full object-cover transition-opacity duration-300 opacity-0" onload="imgLoaded(this)" onerror="handleImgErr(this)">
@@ -113,18 +100,18 @@
                         </div>
                     </div>
                     <div class="p-8 text-center bg-slate-800">
-                        <h2 id="vEs" class="text-4xl font-black text-white uppercase italic tracking-tight leading-none mb-1">---</h2>
-                        <p class="text-slate-500 text-[8px] mt-4 uppercase tracking-[0.2em] font-bold opacity-50 italic">Dokun ve Anlamını Gör</p>
+                        <h2 id="vEs" class="text-4xl font-black text-white uppercase italic tracking-tight mb-1">---</h2>
+                        <p class="text-slate-500 text-[8px] mt-4 uppercase tracking-[0.2em] font-bold opacity-50">Anlamı Gör</p>
                     </div>
                 </div>
 
-                <!-- ARKA YÜZ -->
+                <!-- BACK -->
                 <div class="card-back bg-amber-400 shadow-2xl flex flex-col p-8 items-center justify-center text-slate-900 border-4 border-amber-300">
                     <h3 id="vTr" class="text-4xl font-black mb-6 uppercase text-center leading-tight">---</h3>
                     <div class="w-16 h-1 bg-slate-900/10 mb-8 rounded-full"></div>
-                    <div class="text-center w-full px-2 max-h-48 overflow-y-auto custom-scroll">
+                    <div class="text-center w-full px-2 max-h-48 overflow-y-auto no-scrollbar">
                         <p id="vExEs" class="text-xl font-bold italic leading-tight mb-3 text-slate-800">---</p>
-                        <p id="vExTr" class="text-sm font-medium text-slate-700 opacity-80 italic">---</p>
+                        <p id="vExTr" class="text-sm font-medium text-slate-700 opacity-80">---</p>
                     </div>
                 </div>
 
@@ -132,20 +119,32 @@
         </div>
     </main>
 
-    <!-- FOOTER KONTROL -->
+    <!-- CONTROLS -->
     <footer id="controls" class="p-4 pb-8 bg-slate-900 flex gap-3 border-t border-slate-800 hidden z-10">
         <button onclick="prevVocab()" class="w-16 h-16 bg-slate-800 rounded-2xl text-slate-400 border border-slate-700 flex items-center justify-center active:scale-90 transition-all text-xl">←</button>
-        <button onclick="rndVocab()" class="flex-1 h-16 bg-amber-400 text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-tighter active:scale-95 transition-all shadow-lg shadow-amber-400/20">RASTGELE KELİME</button>
+        
+        <button id="playBtn" onclick="toggleAutoplay()" class="flex-1 h-16 bg-amber-400 text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-tighter active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2">
+            <span id="playIcon">▶</span> <span id="playText">OTOMATİK OYNAT</span>
+        </button>
+        
         <button onclick="nextVocab()" class="w-16 h-16 bg-slate-800 rounded-2xl text-slate-400 border border-slate-700 flex items-center justify-center active:scale-90 transition-all text-xl">→</button>
     </footer>
 
     <script>
         const TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVk_KzWfivaADUS59R7rvyPKt9hoxUCbWEup2VlU4L38dD-ss9eu_CXIloRgpdV8OyepwLmClAcCtj/pub?gid=0&single=true&output=tsv';
         
+        // Autoplay Ayarları (milisaniye)
+        const TIMES = {
+            FRONT: 3500, // Ön yüz bekleme
+            BACK: 2500   // Arka yüz bekleme
+        };
+
         let allVocabs = [];
         let filteredVocabs = [];
         let currentIndex = 0;
         let selectedCategories = [];
+        let autoplayTimer = null;
+        let isAutoplayActive = false;
 
         async function init() {
             try {
@@ -159,30 +158,30 @@
             }
         }
 
-        function startApp(tsvContent) {
+        function startApp(tsv) {
             try {
-                const rows = tsvContent.replace(/\r/g, "").split("\n").filter(r => r.trim() !== "");
+                const rows = tsv.replace(/\r/g, "").split("\n").filter(r => r.trim() !== "");
                 if (rows.length < 2) return;
 
-                allVocabs = rows.slice(1).map((row, idx) => {
+                allVocabs = rows.slice(1).map((row) => {
                     const cols = row.split("\t");
                     if (cols.length < 3) return null;
 
                     const wordEs = (cols[1] || "").trim();
-                    let rawImg = (cols[3] || "").trim();
+                    let imgRaw = (cols[3] || "").trim();
                     
-                    // URL Ayıklama Mantığı
-                    let finalImg = "";
-                    const urlMatch = rawImg.match(/(https?:\/\/[^\s"']+)/);
+                    // Resim URL'sini kaba kuvvete karşı koru (Regex iyileştirildi)
+                    let cleanedImg = "";
+                    const urlMatch = imgRaw.match(/(https?:\/\/[^"'\s\t]+)/);
                     if (urlMatch) {
-                        finalImg = urlMatch[1];
+                        cleanedImg = urlMatch[1].replace(/[")\s]+$/, "");
                     }
 
                     return {
                         cat: (cols[0] || "GENEL").toUpperCase(),
                         es: wordEs,
                         tr: (cols[2] || "---").trim(),
-                        img: finalImg,
+                        img: cleanedImg,
                         exEs: (cols[4] || "").trim(),
                         exTr: (cols[5] || "").trim()
                     };
@@ -194,45 +193,101 @@
                 document.getElementById('loader').classList.add('hidden');
                 document.getElementById('cardWrapper').classList.remove('hidden');
                 document.getElementById('controls').classList.remove('hidden');
-                
                 rndVocab();
             } catch (e) {
-                console.error("Parse Error:", e);
+                console.error("Ayrıştırma hatası.");
             }
         }
 
+        // --- AUTOPLAY LOGIC ---
+        function toggleAutoplay() {
+            isAutoplayActive = !isAutoplayActive;
+            const btn = document.getElementById('playBtn');
+            const icon = document.getElementById('playIcon');
+            const text = document.getElementById('playText');
+            const progressBar = document.getElementById('autoProgressBar');
+
+            if (isAutoplayActive) {
+                btn.classList.replace('bg-amber-400', 'bg-red-500');
+                btn.classList.add('text-white');
+                icon.innerText = "⏸";
+                text.innerText = "DURAKLAT";
+                startAutoplayCycle();
+            } else {
+                btn.classList.replace('bg-red-500', 'bg-amber-400');
+                btn.classList.remove('text-white');
+                icon.innerText = "▶";
+                text.innerText = "OTOMATİK OYNAT";
+                clearTimeout(autoplayTimer);
+                progressBar.style.transition = 'none';
+                progressBar.style.width = '0%';
+            }
+        }
+
+        function startAutoplayCycle() {
+            if (!isAutoplayActive) return;
+            
+            const card = document.getElementById('vocabCard');
+            const progressBar = document.getElementById('autoProgressBar');
+
+            // 1. ADIM: Kart Ön Yüzde
+            card.classList.remove('card-flipped');
+            progressBar.style.transition = 'none';
+            progressBar.style.width = '0%';
+            
+            setTimeout(() => {
+                progressBar.style.transition = `width ${TIMES.FRONT}ms linear`;
+                progressBar.style.width = '100%';
+            }, 50);
+
+            autoplayTimer = setTimeout(() => {
+                // 2. ADIM: Kartı Çevir
+                flipCard();
+                
+                // Arka yüz progress bar
+                progressBar.style.transition = 'none';
+                progressBar.style.width = '0%';
+                setTimeout(() => {
+                    progressBar.style.transition = `width ${TIMES.BACK}ms linear`;
+                    progressBar.style.width = '100%';
+                }, 50);
+
+                autoplayTimer = setTimeout(() => {
+                    // 3. ADIM: Sonrakine geç
+                    nextVocab();
+                    startAutoplayCycle(); // Döngüyü tekrarla
+                }, TIMES.BACK);
+
+            }, TIMES.FRONT);
+        }
+
+        function handleCardClick() {
+            if (isAutoplayActive) toggleAutoplay(); // Manuel müdahalede autoplay'i durdur
+            flipCard();
+        }
+
+        // --- UI & DATA LOGIC ---
         function renderDropdown() {
             const categories = [...new Set(allVocabs.map(v => v.cat))].sort();
             const list = document.getElementById('catList');
             list.innerHTML = categories.map(cat => `
-                <label class="flex items-center gap-2 p-3 bg-slate-900/50 rounded-xl border border-slate-700 cursor-pointer active:bg-amber-400/20">
-                    <input type="checkbox" value="${cat}" class="w-4 h-4 accent-amber-400 rounded" onchange="updateSelectionLabel()">
+                <label class="flex items-center gap-2 p-3 bg-slate-900/50 rounded-xl border border-slate-700 cursor-pointer">
+                    <input type="checkbox" value="${cat}" class="w-4 h-4 accent-amber-400" onchange="updateLabel()">
                     <span class="text-[10px] font-black text-slate-300 uppercase truncate">${cat}</span>
                 </label>
             `).join('');
         }
 
-        function toggleDropdown() {
-            document.getElementById('filterSection').classList.toggle('dropdown-open');
-        }
-
-        function updateSelectionLabel() {
+        function toggleDropdown() { document.getElementById('filterSection').classList.toggle('dropdown-open'); }
+        function selectAll(s) { document.querySelectorAll('#catList input').forEach(i => i.checked = s); updateLabel(); }
+        function updateLabel() {
             const checked = Array.from(document.querySelectorAll('#catList input:checked')).map(i => i.value);
             selectedCategories = checked;
             document.getElementById('selectedCatsLabel').innerText = checked.length > 0 ? checked.join(', ') : 'Tüm Kategoriler';
         }
 
-        function selectAll(status) {
-            document.querySelectorAll('#catList input').forEach(i => i.checked = status);
-            updateSelectionLabel();
-        }
-
         function applyFilters() {
-            if (selectedCategories.length === 0) {
-                filteredVocabs = [...allVocabs];
-            } else {
-                filteredVocabs = allVocabs.filter(v => selectedCategories.includes(v.cat));
-            }
+            filteredVocabs = selectedCategories.length === 0 ? [...allVocabs] : allVocabs.filter(v => selectedCategories.includes(v.cat));
             currentIndex = 0;
             if (document.getElementById('filterSection').classList.contains('dropdown-open')) toggleDropdown();
             renderCard();
@@ -242,7 +297,6 @@
             if (filteredVocabs.length === 0) return;
             const v = filteredVocabs[currentIndex];
             document.getElementById('vocabCard').classList.remove('card-flipped');
-            
             document.getElementById('vCat').innerText = v.cat;
             document.getElementById('vEs').innerText = v.es;
             document.getElementById('vTr').innerText = v.tr;
@@ -251,18 +305,15 @@
             
             const imgEl = document.getElementById('vImg');
             const loaderEl = document.getElementById('vImgLoader');
-            
             imgEl.style.opacity = 0;
             imgEl.dataset.error = "false";
             loaderEl.style.display = 'flex';
             
-            // Eğer URL yoksa veya pollinations ise seed ile üret
-            const fallbackUrl = `https://pollinations.ai/p/${encodeURIComponent(v.es + " illustrative flat design icon white background")}?width=512&height=512&seed=${currentIndex + 42}&nologo=true`;
-            
-            imgEl.src = v.img || fallbackUrl;
+            // Link yoksa veya sorunluysa otomatik üretim
+            const fallback = `https://pollinations.ai/p/${encodeURIComponent(v.es + " clean vector style icon white background")}?width=512&height=512&seed=${currentIndex}&nologo=true`;
+            imgEl.src = v.img || fallback;
 
             document.getElementById('stats').innerText = `${currentIndex + 1} / ${filteredVocabs.length}`;
-            
             const wrapper = document.getElementById('cardWrapper');
             wrapper.classList.remove('animate-pop');
             void wrapper.offsetWidth;
@@ -278,22 +329,16 @@
             if (el.dataset.error === "true") return;
             el.dataset.error = "true";
             const word = document.getElementById('vEs').innerText;
-            // En basit fallback
-            el.src = `https://pollinations.ai/p/${encodeURIComponent(word + " simple icon")}?width=512&height=512&nologo=true`;
+            el.src = `https://pollinations.ai/p/${encodeURIComponent(word + " icon simple")}?width=512&height=512&nologo=true`;
             document.getElementById('vImgLoader').style.display = 'none';
         }
 
-        function loadManual() {
-            const data = document.getElementById('manualInput').value;
-            if (data.length > 20) startApp(data);
-        }
-
+        function loadManual() { const data = document.getElementById('manualInput').value; if (data.length > 20) startApp(data); }
         function flipCard() { document.getElementById('vocabCard').classList.toggle('card-flipped'); }
-        function nextVocab() { if (filteredVocabs.length > 0) { currentIndex = (currentIndex + 1) % filteredVocabs.length; renderCard(); } }
-        function prevVocab() { if (filteredVocabs.length > 0) { currentIndex = (currentIndex - 1 + filteredVocabs.length) % filteredVocabs.length; renderCard(); } }
+        function nextVocab() { currentIndex = (currentIndex + 1) % filteredVocabs.length; renderCard(); }
+        function prevVocab() { currentIndex = (currentIndex - 1 + filteredVocabs.length) % filteredVocabs.length; renderCard(); }
         function rndVocab() { 
-            if (filteredVocabs.length <= 1) return renderCard();
-            let n; do { n = Math.floor(Math.random() * filteredVocabs.length); } while (n === currentIndex);
+            let n; do { n = Math.floor(Math.random() * filteredVocabs.length); } while (n === currentIndex && filteredVocabs.length > 1);
             currentIndex = n; renderCard(); 
         }
 
