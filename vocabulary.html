@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Vocab Master v3.8 - Resim Düzeltme</title>
+    <title>Vocab Master v4.2 - Pro</title>
     
     <!-- Mobil Uygulama Ayarları -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23fbbf24%22/><text y=%22.75em%22 x=%225%22 font-size=%2270%22>🖼️</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23fbbf24%22/><text y=%22.75em%22 x=%225%22 font-size=%2270%22>🇪🇸</text></svg>">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Vocab Master">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -29,91 +30,101 @@
         .card-back { transform: rotateY(180deg); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-pop { animation: fadeIn 0.3s ease-out forwards; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        .loader-dots div { animation: loader-dots 0.6s infinite alternate; }
-        .loader-dots div:nth-child(2) { animation-delay: 0.2s; }
-        .loader-dots div:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes loader-dots { from { opacity: 1; transform: scale(1); } to { opacity: 0.3; transform: scale(0.8); } }
+        /* Dropdown Animasyonu */
+        .dropdown-content { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: max-height 0.3s ease-out, opacity 0.2s; 
+            opacity: 0;
+            pointer-events: none;
+        }
+        .dropdown-open .dropdown-content { 
+            max-height: 60vh; 
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
 <body class="flex flex-col">
 
-    <!-- DURUM KATMANI -->
+    <!-- LOADER / GİRİŞ -->
     <div id="loader" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center flex-col p-10 text-center">
-        <div class="loader-dots flex gap-2 mb-6">
-            <div class="w-3 h-3 bg-amber-400 rounded-full"></div>
-            <div class="w-3 h-3 bg-amber-400 rounded-full"></div>
-            <div class="w-3 h-3 bg-amber-400 rounded-full"></div>
-        </div>
+        <div class="w-12 h-12 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-6"></div>
+        <p id="loadStatus" class="text-amber-400 font-black text-xs tracking-widest uppercase italic">Veriler Hazırlanıyor...</p>
         
-        <div id="loaderUI">
-            <p id="loadStatus" class="text-amber-400 font-black text-xs tracking-widest uppercase">Veriler Yükleniyor...</p>
-            <p id="loadDetail" class="text-slate-500 text-[9px] uppercase tracking-wider mt-2">GitHub / Sheets Senkronizasyonu</p>
-        </div>
-
-        <div id="errorUI" class="hidden animate-pop space-y-4">
-            <div class="bg-red-500/10 border border-red-500/30 p-6 rounded-[2rem]">
-                <p class="text-red-400 font-bold text-xs uppercase mb-2">Bağlantı Hatası</p>
-                <p id="errorMsg" class="text-slate-400 text-[10px] leading-relaxed">Veriler çekilemedi.</p>
-            </div>
-            <button onclick="location.reload()" class="w-full bg-amber-400 text-slate-900 py-4 rounded-2xl font-black text-xs uppercase shadow-xl active:scale-95 transition-transform">Yeniden Dene</button>
-            <button onclick="showManual()" class="text-slate-500 text-[9px] font-bold uppercase py-2 underline">Veriyi El İle Yapıştır</button>
-        </div>
-
-        <div id="manualUI" class="hidden w-full max-w-sm animate-pop">
-            <textarea id="manualInput" class="w-full h-40 bg-slate-800 border border-slate-700 rounded-2xl p-4 text-[10px] text-slate-300 mb-4 focus:outline-none focus:border-amber-400 placeholder:opacity-30" placeholder="Sheets tablosunu kopyalayıp buraya yapıştırın..."></textarea>
-            <button onclick="processManual()" class="w-full bg-amber-400 text-slate-900 py-4 rounded-2xl font-black text-xs uppercase tracking-widest">Uygulamayı Başlat</button>
+        <div id="manualUI" class="hidden w-full max-w-sm mt-8 animate-pop">
+            <textarea id="manualInput" class="w-full h-32 bg-slate-800 border border-slate-700 rounded-2xl p-4 text-[10px] text-slate-300 mb-4 focus:outline-none focus:border-amber-400" placeholder="Tablo verilerini buraya yapıştırın..."></textarea>
+            <button onclick="loadManual()" class="w-full bg-amber-400 text-slate-900 py-4 rounded-xl font-black text-xs uppercase shadow-lg active:scale-95 transition-transform">Başlat</button>
         </div>
     </div>
 
     <!-- HEADER -->
-    <header class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/80 backdrop-blur-md z-10">
+    <header class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/80 backdrop-blur-md z-40">
         <div class="flex items-center gap-2">
             <span class="text-2xl">🇪🇸</span>
             <div class="flex flex-col">
                 <h1 class="text-[10px] font-black text-amber-400 uppercase tracking-tighter leading-none">Vocab Master</h1>
-                <p class="text-[7px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">GitHub v3.8</p>
+                <p class="text-[7px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">v4.2 Stable</p>
             </div>
         </div>
         <div id="stats" class="text-[9px] bg-slate-800 px-3 py-1 rounded-full text-slate-400 font-bold border border-slate-700 tracking-tighter">0 / 0</div>
     </header>
 
-    <!-- KATEGORİ SEÇİCİ -->
-    <nav id="catNav" class="flex gap-2 overflow-x-auto p-3 border-b border-slate-800 bg-slate-900/30 no-scrollbar z-10">
-        <!-- JS ile dolacak -->
-    </nav>
+    <!-- ÇOKLU KATEGORİ SEÇİMİ -->
+    <div id="filterSection" class="relative z-30 bg-slate-900/50 border-b border-slate-800">
+        <button onclick="toggleDropdown()" class="w-full p-4 flex items-center justify-between text-left active:bg-slate-800 transition-colors">
+            <div class="flex flex-col">
+                <span class="text-[8px] text-slate-500 font-black uppercase tracking-widest">Kategori Seçimi (Çoklu)</span>
+                <span id="selectedCatsLabel" class="text-[10px] text-amber-400 font-black uppercase truncate max-w-[70vw]">Tüm Kategoriler</span>
+            </div>
+            <span id="dropIcon" class="text-slate-500 transition-transform duration-300">▼</span>
+        </button>
+        <div id="dropdownMenu" class="dropdown-content absolute w-full bg-slate-800 border-b border-slate-700 shadow-2xl z-50">
+            <div id="catList" class="grid grid-cols-2 gap-2 p-4 max-h-[40vh] overflow-y-auto custom-scroll">
+                <!-- Kategoriler JS ile dolacak -->
+            </div>
+            <div class="p-4 bg-slate-900/50 flex gap-2">
+                <button onclick="selectAll(true)" class="flex-1 text-[8px] font-black uppercase text-slate-400 border border-slate-700 py-2 rounded-lg">Hepsini Seç</button>
+                <button onclick="selectAll(false)" class="flex-1 text-[8px] font-black uppercase text-slate-400 border border-slate-700 py-2 rounded-lg">Temizle</button>
+                <button onclick="applyFilters()" class="flex-[2] bg-amber-400 text-slate-900 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest active:scale-95 transition-transform">Filtrele</button>
+            </div>
+        </div>
+    </div>
 
-    <!-- KART ALANI -->
+    <!-- MAIN KART -->
     <main id="app" class="flex-1 flex flex-col items-center justify-center p-4">
         <div id="cardWrapper" class="relative w-full max-w-sm aspect-[3/4] perspective-1000 hidden">
             <div id="vocabCard" class="card-inner w-full h-full relative cursor-pointer" onclick="flipCard()">
                 
                 <!-- ÖN YÜZ -->
                 <div class="card-front bg-slate-800 border border-slate-700 shadow-2xl overflow-hidden flex flex-col">
-                    <div class="flex-1 bg-black relative flex items-center justify-center overflow-hidden group">
-                        <img id="vImg" src="" class="w-full h-full object-cover transition-opacity duration-300 opacity-0" onload="this.style.opacity=1" onerror="handleImageError(this)">
-                        <!-- Resim Yükleme İndikatörü -->
-                        <div id="imgPlaceholder" class="absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-700">
+                    <div class="flex-1 bg-black relative flex items-center justify-center overflow-hidden">
+                        <img id="vImg" src="" class="w-full h-full object-cover transition-opacity duration-300 opacity-0" onload="imgLoaded(this)" onerror="handleImgErr(this)">
+                        <div id="vImgLoader" class="absolute inset-0 flex items-center justify-center bg-slate-950 text-slate-700">
                              <div class="w-6 h-6 border-2 border-amber-400/20 border-t-amber-400 rounded-full animate-spin"></div>
                         </div>
                         <div class="absolute top-4 left-4">
-                            <span id="vCat" class="bg-amber-400 text-slate-900 text-[8px] font-black px-3 py-1 rounded-full uppercase shadow-lg">KATEGORİ</span>
+                            <span id="vCat" class="bg-amber-400 text-slate-900 text-[8px] font-black px-3 py-1 rounded-full uppercase shadow-lg">---</span>
                         </div>
                     </div>
                     <div class="p-8 text-center bg-slate-800">
-                        <h2 id="vEs" class="text-3xl font-black text-white uppercase italic tracking-tight leading-none mb-1">KELİME</h2>
-                        <p class="text-slate-500 text-[8px] mt-4 uppercase tracking-[0.2em] font-bold opacity-50">Anlamı İçin Dokun</p>
+                        <h2 id="vEs" class="text-4xl font-black text-white uppercase italic tracking-tight leading-none mb-1">---</h2>
+                        <p class="text-slate-500 text-[8px] mt-4 uppercase tracking-[0.2em] font-bold opacity-50 italic">Dokun ve Anlamını Gör</p>
                     </div>
                 </div>
 
                 <!-- ARKA YÜZ -->
                 <div class="card-back bg-amber-400 shadow-2xl flex flex-col p-8 items-center justify-center text-slate-900 border-4 border-amber-300">
-                    <h3 id="vTr" class="text-4xl font-black mb-6 uppercase text-center leading-tight">ANLAM</h3>
+                    <h3 id="vTr" class="text-4xl font-black mb-6 uppercase text-center leading-tight">---</h3>
                     <div class="w-16 h-1 bg-slate-900/10 mb-8 rounded-full"></div>
-                    <div class="text-center w-full px-2">
+                    <div class="text-center w-full px-2 max-h-48 overflow-y-auto custom-scroll">
                         <p id="vExEs" class="text-xl font-bold italic leading-tight mb-3 text-slate-800">---</p>
-                        <p id="vExTr" class="text-sm font-medium text-slate-700 opacity-80">---</p>
+                        <p id="vExTr" class="text-sm font-medium text-slate-700 opacity-80 italic">---</p>
                     </div>
                 </div>
 
@@ -121,10 +132,10 @@
         </div>
     </main>
 
-    <!-- BUTONLAR -->
+    <!-- FOOTER KONTROL -->
     <footer id="controls" class="p-4 pb-8 bg-slate-900 flex gap-3 border-t border-slate-800 hidden z-10">
         <button onclick="prevVocab()" class="w-16 h-16 bg-slate-800 rounded-2xl text-slate-400 border border-slate-700 flex items-center justify-center active:scale-90 transition-all text-xl">←</button>
-        <button onclick="rndVocab()" class="flex-1 h-16 bg-amber-400 text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-amber-400/20">RASTGELE KELİME</button>
+        <button onclick="rndVocab()" class="flex-1 h-16 bg-amber-400 text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-tighter active:scale-95 transition-all shadow-lg shadow-amber-400/20">RASTGELE KELİME</button>
         <button onclick="nextVocab()" class="w-16 h-16 bg-slate-800 rounded-2xl text-slate-400 border border-slate-700 flex items-center justify-center active:scale-90 transition-all text-xl">→</button>
     </footer>
 
@@ -134,104 +145,104 @@
         let allVocabs = [];
         let filteredVocabs = [];
         let currentIndex = 0;
-        let activeCategory = 'HEPSİ';
+        let selectedCategories = [];
 
         async function init() {
             try {
                 const response = await fetch(TSV_URL);
-                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                if (!response.ok) throw new Error();
                 const data = await response.text();
                 startApp(data);
             } catch (err) {
-                console.error("Fetch hatası:", err);
-                showError("Veriler alınamadı. İnternet bağlantınızı veya Sheets yayınını kontrol edin.");
+                document.getElementById('loadStatus').innerText = "BAĞLANTI GECİKTİ";
+                document.getElementById('manualUI').classList.remove('hidden');
             }
-        }
-
-        function showError(msg) {
-            document.getElementById('loaderUI').classList.add('hidden');
-            document.getElementById('errorUI').classList.remove('hidden');
-            document.getElementById('errorMsg').innerText = msg;
-        }
-
-        function showManual() {
-            document.getElementById('errorUI').classList.add('hidden');
-            document.getElementById('manualUI').classList.remove('hidden');
-        }
-
-        function processManual() {
-            const val = document.getElementById('manualInput').value;
-            if (!val || val.length < 20) return alert("Lütfen verileri yapıştırın.");
-            startApp(val);
         }
 
         function startApp(tsvContent) {
             try {
                 const rows = tsvContent.replace(/\r/g, "").split("\n").filter(r => r.trim() !== "");
-                if (rows.length < 2) throw new Error("Veri içeriği yetersiz.");
+                if (rows.length < 2) return;
 
                 allVocabs = rows.slice(1).map((row, idx) => {
                     const cols = row.split("\t");
                     if (cols.length < 3) return null;
 
-                    const esp = (cols[1] || "").trim();
-                    let imgRaw = (cols[3] || "").trim();
-
-                    // KRİTİK DÜZELTME: Linki temizle (Tırnaklar, boşluklar ve IMAGE formülünü atar)
-                    let cleanedImg = "";
-                    const urlMatch = imgRaw.match(/(https?:\/\/[^\s"']+)/);
+                    const wordEs = (cols[1] || "").trim();
+                    let rawImg = (cols[3] || "").trim();
+                    
+                    // URL Ayıklama Mantığı
+                    let finalImg = "";
+                    const urlMatch = rawImg.match(/(https?:\/\/[^\s"']+)/);
                     if (urlMatch) {
-                        cleanedImg = urlMatch[1];
+                        finalImg = urlMatch[1];
                     }
 
                     return {
                         cat: (cols[0] || "GENEL").toUpperCase(),
-                        es: esp,
+                        es: wordEs,
                         tr: (cols[2] || "---").trim(),
-                        img: cleanedImg,
+                        img: finalImg,
                         exEs: (cols[4] || "").trim(),
                         exTr: (cols[5] || "").trim()
                     };
-                }).filter(v => v !== null && v.es !== "");
+                }).filter(v => v && v.es);
 
-                if (allVocabs.length === 0) throw new Error("Ayrıştırılabilir veri bulunamadı.");
-
-                filteredVocabs = [...allVocabs];
-                setupCategories();
+                renderDropdown();
+                applyFilters(); 
                 
                 document.getElementById('loader').classList.add('hidden');
                 document.getElementById('cardWrapper').classList.remove('hidden');
                 document.getElementById('controls').classList.remove('hidden');
                 
                 rndVocab();
-            } catch (err) {
-                showError("Veri işlenirken hata oluştu.");
+            } catch (e) {
+                console.error("Parse Error:", e);
             }
         }
 
-        function setupCategories() {
-            const cats = ['HEPSİ', ...new Set(allVocabs.map(v => v.cat))];
-            const nav = document.getElementById('catNav');
-            nav.innerHTML = cats.map(c => `
-                <button onclick="filterCat('${c}')" class="flex-shrink-0 px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${c === activeCategory ? 'bg-amber-400 text-slate-900 shadow-lg' : 'bg-slate-800 text-slate-500 border border-slate-700'}">${c}</button>
+        function renderDropdown() {
+            const categories = [...new Set(allVocabs.map(v => v.cat))].sort();
+            const list = document.getElementById('catList');
+            list.innerHTML = categories.map(cat => `
+                <label class="flex items-center gap-2 p-3 bg-slate-900/50 rounded-xl border border-slate-700 cursor-pointer active:bg-amber-400/20">
+                    <input type="checkbox" value="${cat}" class="w-4 h-4 accent-amber-400 rounded" onchange="updateSelectionLabel()">
+                    <span class="text-[10px] font-black text-slate-300 uppercase truncate">${cat}</span>
+                </label>
             `).join('');
         }
 
-        function filterCat(c) {
-            activeCategory = c;
-            filteredVocabs = c === 'HEPSİ' ? [...allVocabs] : allVocabs.filter(v => v.cat === c);
-            currentIndex = 0;
-            setupCategories();
-            renderCard();
+        function toggleDropdown() {
+            document.getElementById('filterSection').classList.toggle('dropdown-open');
         }
 
-        function flipCard() { document.getElementById('vocabCard').classList.toggle('card-flipped'); }
+        function updateSelectionLabel() {
+            const checked = Array.from(document.querySelectorAll('#catList input:checked')).map(i => i.value);
+            selectedCategories = checked;
+            document.getElementById('selectedCatsLabel').innerText = checked.length > 0 ? checked.join(', ') : 'Tüm Kategoriler';
+        }
+
+        function selectAll(status) {
+            document.querySelectorAll('#catList input').forEach(i => i.checked = status);
+            updateSelectionLabel();
+        }
+
+        function applyFilters() {
+            if (selectedCategories.length === 0) {
+                filteredVocabs = [...allVocabs];
+            } else {
+                filteredVocabs = allVocabs.filter(v => selectedCategories.includes(v.cat));
+            }
+            currentIndex = 0;
+            if (document.getElementById('filterSection').classList.contains('dropdown-open')) toggleDropdown();
+            renderCard();
+        }
 
         function renderCard() {
             if (filteredVocabs.length === 0) return;
             const v = filteredVocabs[currentIndex];
-
             document.getElementById('vocabCard').classList.remove('card-flipped');
+            
             document.getElementById('vCat').innerText = v.cat;
             document.getElementById('vEs').innerText = v.es;
             document.getElementById('vTr').innerText = v.tr;
@@ -239,46 +250,54 @@
             document.getElementById('vExTr').innerText = v.exTr || "";
             
             const imgEl = document.getElementById('vImg');
-            const placeholder = document.getElementById('imgPlaceholder');
+            const loaderEl = document.getElementById('vImgLoader');
             
             imgEl.style.opacity = 0;
-            placeholder.style.display = 'flex';
+            imgEl.dataset.error = "false";
+            loaderEl.style.display = 'flex';
             
-            // Link temiz mi? Konsoldan kontrol edebilirsin (F12)
-            console.log(`Yükleniyor: ${v.es} -> ${v.img}`);
+            // Eğer URL yoksa veya pollinations ise seed ile üret
+            const fallbackUrl = `https://pollinations.ai/p/${encodeURIComponent(v.es + " illustrative flat design icon white background")}?width=512&height=512&seed=${currentIndex + 42}&nologo=true`;
             
-            // Eğer resim linki yoksa pollinations ile üret
-            imgEl.src = v.img || `https://pollinations.ai/p/${encodeURIComponent(v.es + " vector icon white background")}?width=512&height=512&seed=${currentIndex}&nologo=true`;
-            
-            imgEl.onload = () => {
-                imgEl.style.opacity = 1;
-                placeholder.style.display = 'none';
-            };
+            imgEl.src = v.img || fallbackUrl;
 
             document.getElementById('stats').innerText = `${currentIndex + 1} / ${filteredVocabs.length}`;
-
+            
             const wrapper = document.getElementById('cardWrapper');
             wrapper.classList.remove('animate-pop');
             void wrapper.offsetWidth;
             wrapper.classList.add('animate-pop');
         }
 
-        function handleImageError(el) {
-            console.error("Resim yüklenemedi:", el.src);
-            el.src = 'https://via.placeholder.com/400x400?text=Resim+Yuklenemedi';
-            document.getElementById('imgPlaceholder').style.display = 'none';
+        function imgLoaded(img) {
+            img.style.opacity = 1;
+            document.getElementById('vImgLoader').style.display = 'none';
         }
 
-        function nextVocab() { currentIndex = (currentIndex + 1) % filteredVocabs.length; renderCard(); }
-        function prevVocab() { currentIndex = (currentIndex - 1 + filteredVocabs.length) % filteredVocabs.length; renderCard(); }
+        function handleImgErr(el) {
+            if (el.dataset.error === "true") return;
+            el.dataset.error = "true";
+            const word = document.getElementById('vEs').innerText;
+            // En basit fallback
+            el.src = `https://pollinations.ai/p/${encodeURIComponent(word + " simple icon")}?width=512&height=512&nologo=true`;
+            document.getElementById('vImgLoader').style.display = 'none';
+        }
+
+        function loadManual() {
+            const data = document.getElementById('manualInput').value;
+            if (data.length > 20) startApp(data);
+        }
+
+        function flipCard() { document.getElementById('vocabCard').classList.toggle('card-flipped'); }
+        function nextVocab() { if (filteredVocabs.length > 0) { currentIndex = (currentIndex + 1) % filteredVocabs.length; renderCard(); } }
+        function prevVocab() { if (filteredVocabs.length > 0) { currentIndex = (currentIndex - 1 + filteredVocabs.length) % filteredVocabs.length; renderCard(); } }
         function rndVocab() { 
             if (filteredVocabs.length <= 1) return renderCard();
             let n; do { n = Math.floor(Math.random() * filteredVocabs.length); } while (n === currentIndex);
             currentIndex = n; renderCard(); 
         }
 
-            window.onload = init;
+        window.onload = init;
     </script>
 </body>
 </html>
-
