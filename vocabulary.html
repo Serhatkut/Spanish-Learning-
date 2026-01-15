@@ -2,280 +2,299 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vocab Master v7.0 - Plain</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Vocab Master v7.3 - Final Plain</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        :root { --sat: env(safe-area-inset-top); --sab: env(safe-area-inset-bottom); }
         body { 
-            background-color: #f1f5f9; 
-            color: #1e293b; 
-            font-family: system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 0;
+            background-color: #ffffff; 
+            color: #111827; 
+            font-family: -apple-system, system-ui, sans-serif;
+            margin: 0; padding: 0;
+            padding-top: var(--sat);
+            padding-bottom: var(--sab);
             height: 100vh;
             display: flex;
             flex-direction: column;
-        }
-        .container { flex: 1; overflow-y: auto; padding: 15px; }
-        .content-box {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
             overflow: hidden;
+        }
+        .container { flex: 1; overflow-y: auto; padding: 16px; }
+        .content-card {
             width: 100%;
             max-width: 500px;
             margin: 0 auto;
+            background: #fff;
+            border: 1px solid #f3f4f6;
         }
-        .image-container {
+        .image-wrapper {
             width: 100%;
-            aspect-ratio: 1/1;
-            background: #e2e8f0;
-            position: relative;
+            aspect-ratio: 1 / 1;
+            background: #f9fafb;
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            border-bottom: 1px solid #f3f4f6;
         }
-        img { width: 100%; height: 100%; object-cover: cover; }
-        .badge {
+        #vImg {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+            z-index: 10;
+        }
+        .spinner {
+            width: 28px; height: 28px;
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
             position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(0,0,0,0.6);
+            z-index: 5;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .cat-badge {
+            position: absolute;
+            top: 12px; left: 12px;
+            background: #4f46e5;
             color: white;
             padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: bold;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 900;
             text-transform: uppercase;
+            z-index: 20;
+            letter-spacing: 0.05em;
         }
-        .btn {
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-        .btn:active { transform: scale(0.95); }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        /* Dropdown sadeleştirme */
-        #dropdownMenu {
+
+        #filterPanel {
             display: none;
-            background: white;
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            z-index: 100;
-            padding: 20px;
+            inset: 0;
+            background: white;
+            z-index: 200;
+            padding: 24px;
             overflow-y: auto;
         }
-        .dropdown-open #dropdownMenu { display: block; }
+        .filter-active #filterPanel { display: block; }
+        
+        .btn-active:active { transform: scale(0.92); }
     </style>
 </head>
 <body>
 
-    <!-- ÜST BAR -->
-    <div class="bg-white border-b p-4 flex justify-between items-center shadow-sm">
-        <div class="flex flex-col">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Vocab Master</span>
-            <span id="currentStatus" class="text-lg font-black text-indigo-600">LÜTFEN BEKLEYİN...</span>
+    <!-- ÜST NAVİGASYON -->
+    <header class="p-4 border-b flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-50">
+        <div>
+            <h1 class="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Vocab Master</h1>
+            <div id="stats" class="text-indigo-600 font-black text-sm mt-1">0 / 0</div>
         </div>
-        <div class="flex items-center gap-2">
-            <button onclick="toggleDropdown()" class="bg-slate-100 p-2 rounded-lg text-slate-600">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="2" y1="14" x2="6" y2="14"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="18" y1="16" x2="22" y2="16"/></svg>
+        <div class="flex gap-2">
+            <button onclick="toggleFilter()" class="p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-gray-600 btn-active">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 3H2l8 9v11l4-6V12L22 3z"/></svg>
             </button>
-            <div id="stats" class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold">0 / 0</div>
+        </div>
+    </header>
+
+    <!-- FİLTRE PANELİ -->
+    <div id="filterPanel">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-black tracking-tighter uppercase">Ders Seçimi</h2>
+            <button onclick="toggleFilter()" class="bg-gray-100 px-4 py-2 rounded-lg font-bold text-xs">KAPAT</button>
+        </div>
+        <div id="catList" class="space-y-3 mb-32"></div>
+        <div class="fixed bottom-0 left-0 right-0 p-6 bg-white border-t flex gap-3 shadow-2xl">
+            <button onclick="selectAll(true)" class="flex-1 py-4 border rounded-2xl font-bold text-gray-400 text-xs uppercase">Hepsini Seç</button>
+            <button onclick="applyFilters()" class="flex-[2] py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-lg">Listeyi Başlat</button>
         </div>
     </div>
 
-    <!-- KATEGORİ SEÇİM EKRANI (TAM EKRAN OVERLAY) -->
-    <div id="dropdownMenu">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold">Kategoriler</h2>
-            <button onclick="toggleDropdown()" class="text-slate-400">Kapat</button>
-        </div>
-        <div id="catList" class="grid grid-cols-1 gap-3 mb-20"></div>
-        <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t flex gap-2">
-            <button onclick="selectAll(true)" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Hepsini Seç</button>
-            <button onclick="applyFilters()" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-bold">Uygula</button>
-        </div>
-    </div>
-
-    <!-- ANA İÇERİK ALANI -->
-    <div class="container flex flex-col justify-center">
-        <div id="loader" class="text-center py-10">
-            <div class="inline-block w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <p class="mt-4 text-slate-500 font-medium">Veriler yükleniyor...</p>
-        </div>
-
-        <div id="app" class="hidden">
-            <div class="content-box">
-                <!-- RESİM BÖLÜMÜ -->
-                <div class="image-container">
-                    <span id="vCat" class="badge">Kategori</span>
-                    <img id="vImg" src="" alt="Kelime Görseli" onerror="this.style.display='none'; document.getElementById('imgFallback').style.display='flex'">
-                    <div id="imgFallback" class="hidden flex-col items-center justify-center text-slate-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                        <span class="text-[10px] mt-2 font-bold uppercase tracking-widest">Görsel Yok</span>
-                    </div>
+    <!-- ANA İÇERİK -->
+    <main class="container">
+        <div id="app" class="content-card rounded-3xl overflow-hidden shadow-sm">
+            <!-- GÖRSEL -->
+            <div class="image-wrapper">
+                <div id="vCat" class="cat-badge">---</div>
+                <div id="loader" class="spinner"></div>
+                <img id="vImg" src="" alt="Vocab" referrerpolicy="no-referrer" onload="imgDone()" onerror="imgFail()">
+                
+                <div id="noImg" class="hidden flex flex-col items-center opacity-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
                 </div>
+            </div>
 
-                <!-- BİLGİ BÖLÜMÜ -->
-                <div class="p-6">
-                    <div class="text-center mb-6">
-                        <h1 id="vEs" class="text-4xl font-black text-slate-900 uppercase tracking-tighter mb-1">---</h1>
-                        <h2 id="vTr" class="text-xl font-bold text-indigo-600 uppercase">---</h2>
+            <!-- METİN -->
+            <div class="p-8">
+                <div class="text-center mb-10">
+                    <h1 id="vEs" class="text-5xl font-black text-gray-900 uppercase tracking-tighter mb-2">---</h1>
+                    <h2 id="vTr" class="text-2xl font-bold text-indigo-600 uppercase tracking-tight">---</h2>
+                </div>
+                
+                <div class="space-y-6 border-t border-gray-50 pt-8">
+                    <div>
+                        <span class="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-2">Örnek Cümle</span>
+                        <p id="vExEs" class="text-xl text-gray-800 font-medium italic leading-snug">---</p>
                     </div>
-                    
-                    <div class="space-y-4 border-t pt-6">
-                        <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Örnek Cümle (ES)</p>
-                            <p id="vExEs" class="text-lg font-medium italic text-slate-700 leading-snug">---</p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Türkçe Çevirisi</p>
-                            <p id="vExTr" class="text-md font-semibold text-slate-500">---</p>
-                        </div>
+                    <div>
+                        <span class="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-2">Anlam</span>
+                        <p id="vExTr" class="text-lg text-gray-500 font-semibold">---</p>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- ALT KONTROLLER -->
-    <div class="bg-white border-t p-6 flex justify-between items-center gap-4 shadow-lg">
-        <button onclick="prevVocab()" class="btn w-14 h-14 bg-slate-100 rounded-2xl text-slate-600">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    <footer class="p-6 bg-white border-t flex gap-4 items-center shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
+        <button onclick="prev()" class="w-16 h-16 flex items-center justify-center border border-gray-100 rounded-3xl btn-active text-gray-300">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </button>
-        <button id="playBtn" onclick="toggleAutoplay()" class="btn flex-1 h-14 bg-slate-900 text-white rounded-2xl font-bold uppercase text-sm tracking-widest">
-            <span id="playIcon" class="mr-2">▶</span> <span id="playText">OTOMATİK</span>
+        
+        <button id="playBtn" onclick="togglePlay()" class="flex-1 h-16 bg-gray-900 text-white rounded-3xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 shadow-xl shadow-gray-200 btn-active">
+            <span id="pIcon">▶</span> <span id="pText">OTOMATİK</span>
         </button>
-        <button onclick="rndVocab()" class="btn w-14 h-14 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-200">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        
+        <button onclick="rnd()" class="w-16 h-16 flex items-center justify-center bg-indigo-600 text-white rounded-3xl shadow-xl shadow-indigo-200 btn-active">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
-    </div>
+    </footer>
 
     <script>
         const TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVk_KzWfivaADUS59R7rvyPKt9hoxUCbWEup2VlU4L38dD-ss9eu_CXIloRgpdV8OyepwLmClAcCtj/pub?gid=2089607689&single=true&output=tsv';
         
-        let allVocabs = [];
-        let filteredVocabs = [];
-        let currentIndex = 0;
-        let selectedCategories = [];
-        let autoplayTimer = null;
-        let isAutoplayActive = false;
+        let allItems = [];
+        let data = [];
+        let index = 0;
+        let playTask = null;
+        let isPlaying = false;
 
         async function init() {
             try {
-                const response = await fetch(`${TSV_URL}&cb=${Date.now()}`);
-                const data = await response.text();
-                parseTSV(data);
-            } catch (err) {
-                document.getElementById('currentStatus').innerText = "HATA!";
-                alert("Bağlantı kurulamadı.");
+                const res = await fetch(`${TSV_URL}&nocache=${Date.now()}`);
+                const text = await res.text();
+                const rows = text.split("\n").filter(r => r.trim() !== "");
+                
+                allItems = rows.slice(1).map(row => {
+                    const cols = row.split("\t");
+                    return {
+                        cat: (cols[0] || "GENEL").trim(),
+                        es: (cols[1] || "").trim(),
+                        tr: (cols[2] || "").trim(),
+                        img: (cols[3] || "").trim(),
+                        exEs: (cols[4] || "").trim(),
+                        exTr: (cols[5] || "").trim()
+                    };
+                }).filter(i => i.es);
+
+                renderCategories();
+                applyFilters();
+            } catch (e) {
+                console.error("Yükleme hatası:", e);
             }
         }
 
-        function parseTSV(tsv) {
-            const rows = tsv.split("\n").filter(r => r.trim() !== "");
-            allVocabs = rows.slice(1).map(row => {
-                const cols = row.split("\t");
-                return {
-                    cat: (cols[0] || "GENEL").trim(),
-                    es: (cols[1] || "").trim(),
-                    tr: (cols[2] || "").trim(),
-                    img: (cols[3] || "").trim(),
-                    exEs: (cols[4] || "").trim(),
-                    exTr: (cols[5] || "").trim()
-                };
-            }).filter(v => v.es);
-
-            renderCategories();
-            applyFilters();
-            
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('app').classList.remove('hidden');
-            document.getElementById('currentStatus').innerText = "HAZIR";
+        // Drive ID ayıklama ve Thumbnail formatına çevirme
+        function fixDriveUrl(url) {
+            if (!url || !url.includes('drive.google.com')) return url;
+            const match = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            return match ? `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000` : url;
         }
 
         function renderCategories() {
-            const cats = [...new Set(allVocabs.map(v => v.cat))].sort();
-            document.getElementById('catList').innerHTML = cats.map(cat => `
-                <label class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer active:bg-indigo-50">
-                    <input type="checkbox" value="${cat}" class="w-6 h-6 rounded accent-indigo-600">
-                    <span class="font-bold text-slate-700">${cat}</span>
+            const cats = [...new Set(allItems.map(i => i.cat))].sort();
+            document.getElementById('catList').innerHTML = cats.map(c => `
+                <label class="flex items-center p-5 border rounded-2xl gap-5 active:bg-indigo-50 transition-colors cursor-pointer">
+                    <input type="checkbox" value="${c}" class="w-7 h-7 rounded-lg accent-indigo-600">
+                    <span class="font-black text-gray-800 uppercase text-sm tracking-tight">${c}</span>
                 </label>
             `).join('');
         }
 
-        function toggleDropdown() {
-            document.body.classList.toggle('dropdown-open');
-        }
-
-        function selectAll(s) {
-            document.querySelectorAll('#catList input').forEach(i => i.checked = s);
-        }
+        function toggleFilter() { document.body.classList.toggle('filter-active'); }
+        function selectAll(s) { document.querySelectorAll('#catList input').forEach(i => i.checked = s); }
 
         function applyFilters() {
             const checked = Array.from(document.querySelectorAll('#catList input:checked')).map(i => i.value);
-            selectedCategories = checked;
-            filteredVocabs = checked.length === 0 ? [...allVocabs] : allVocabs.filter(v => checked.includes(v.cat));
-            currentIndex = 0;
-            document.body.classList.remove('dropdown-open');
-            rndVocab();
+            data = checked.length === 0 ? [...allItems] : allItems.filter(i => checked.includes(i.cat));
+            index = 0;
+            document.body.classList.remove('filter-active');
+            rnd();
         }
 
         function renderCard() {
-            if (filteredVocabs.length === 0) return;
-            const v = filteredVocabs[currentIndex];
+            if (data.length === 0) return;
+            const item = data[index];
             
-            document.getElementById('vCat').innerText = v.cat;
-            document.getElementById('vEs').innerText = v.es;
-            document.getElementById('vTr').innerText = v.tr;
-            document.getElementById('vExEs').innerText = v.exEs || "Örnek cümle bulunamadı.";
-            document.getElementById('vExTr').innerText = v.exTr || "";
+            document.getElementById('vCat').innerText = item.cat;
+            document.getElementById('vEs').innerText = item.es;
+            document.getElementById('vTr').innerText = item.tr;
+            document.getElementById('vExEs').innerText = item.exEs || "-";
+            document.getElementById('vExTr').innerText = item.exTr || "-";
             
             const imgEl = document.getElementById('vImg');
-            document.getElementById('imgFallback').style.display = 'none';
-            imgEl.style.display = 'block';
-            imgEl.src = v.img || "";
-
-            document.getElementById('stats').innerText = `${currentIndex + 1} / ${filteredVocabs.length}`;
-        }
-
-        function rndVocab() {
-            if (filteredVocabs.length < 2) { currentIndex = 0; }
-            else {
-                let n; do { n = Math.floor(Math.random() * filteredVocabs.length); } while (n === currentIndex);
-                currentIndex = n;
-            }
-            renderCard();
-        }
-
-        function prevVocab() {
-            currentIndex = (currentIndex - 1 + filteredVocabs.length) % filteredVocabs.length;
-            renderCard();
-        }
-
-        function toggleAutoplay() {
-            isAutoplayActive = !isAutoplayActive;
-            const btn = document.getElementById('playBtn');
-            if (isAutoplayActive) {
-                btn.classList.replace('bg-slate-900', 'bg-red-500');
-                document.getElementById('playIcon').innerText = "⏸";
-                startAutoplay();
+            const loader = document.getElementById('loader');
+            const noImg = document.getElementById('noImg');
+            
+            imgEl.style.display = 'none';
+            noImg.classList.add('hidden');
+            loader.style.display = 'block';
+            
+            const finalUrl = fixDriveUrl(item.img);
+            if (finalUrl) {
+                imgEl.src = finalUrl;
             } else {
-                btn.classList.replace('bg-red-500', 'bg-slate-900');
-                document.getElementById('playIcon').innerText = "▶";
-                clearTimeout(autoplayTimer);
+                imgFail();
+            }
+
+            document.getElementById('stats').innerText = `${index + 1} / ${data.length}`;
+        }
+
+        function imgDone() {
+            document.getElementById('vImg').style.display = 'block';
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        function imgFail() {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('vImg').style.display = 'none';
+            document.getElementById('noImg').classList.remove('hidden');
+        }
+
+        function rnd() {
+            if (data.length > 1) {
+                let n; do { n = Math.floor(Math.random() * data.length); } while (n === index);
+                index = n;
+            } else { index = 0; }
+            renderCard();
+        }
+
+        function prev() {
+            index = (index - 1 + data.length) % data.length;
+            renderCard();
+        }
+
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('playBtn');
+            if (isPlaying) {
+                btn.classList.replace('bg-gray-900', 'bg-red-600');
+                document.getElementById('pIcon').innerText = "⏸";
+                loop();
+            } else {
+                btn.classList.replace('bg-red-600', 'bg-gray-900');
+                document.getElementById('pIcon').innerText = "▶";
+                clearTimeout(playTask);
             }
         }
 
-        function startAutoplay() {
-            if (!isAutoplayActive) return;
-            autoplayTimer = setTimeout(() => {
-                rndVocab();
-                startAutoplay();
-            }, 3500);
+        function loop() {
+            if (!isPlaying) return;
+            playTask = setTimeout(() => {
+                rnd(); // Rastgele devam eder
+                loop();
+            }, 5000);
         }
 
         window.onload = init;
