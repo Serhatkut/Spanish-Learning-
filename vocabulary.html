@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Vocab Master v4.5 - Pro</title>
+    <title>Vocab Master v5.0 - Pro</title>
     
     <!-- Mobil Uygulama Ayarları -->
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23fbbf24%22/><text y=%22.75em%22 x=%225%22 font-size=%2270%22>🇪🇸</text></svg>">
@@ -19,132 +19,188 @@
             padding-top: var(--sat); 
             padding-bottom: var(--sab); 
             -webkit-tap-highlight-color: transparent; 
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             overflow: hidden;
             height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        .card-inner { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+
+        /* Kartın ekrana sığması için hesaplamalar */
+        .card-container {
+            perspective: 1000px;
+            width: 100%;
+            max-width: 400px;
+            height: 100%;
+            max-height: 600px; /* Mobil ekranlar için optimize edildi */
+        }
+
+        .card-inner { 
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
+            transform-style: preserve-3d; 
+            height: 100%;
+            width: 100%;
+        }
         .card-flipped { transform: rotateY(180deg); }
-        .card-front, .card-back { backface-visibility: hidden; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 2.5rem; }
+        
+        .card-front, .card-back { 
+            backface-visibility: hidden; 
+            position: absolute; 
+            top: 0; left: 0; width: 100%; height: 100%; 
+            border-radius: 2rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
         .card-back { transform: rotateY(180deg); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-pop { animation: fadeIn 0.3s ease-out forwards; }
+
+        .progress-bar { 
+            height: 4px; 
+            background: #fbbf24; 
+            width: 0%; 
+            transition: width linear;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+
+        /* Material Design Dropdown */
+        .dropdown-content { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            opacity: 0; 
+            pointer-events: none;
+            transform: translateY(-10px);
+        }
+        .dropdown-open .dropdown-content { 
+            max-height: 70vh; 
+            opacity: 1; 
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .fab {
+            transition: all 0.2s ease;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        .fab:active { transform: scale(0.9); }
+
+        @keyframes pulse-gold { 0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(251, 191, 36, 0); } 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); } }
+        .autoplay-active { animation: pulse-gold 2s infinite; }
         
-        .dropdown-content { max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out; opacity: 0; pointer-events: none; }
-        .dropdown-open .dropdown-content { max-height: 60vh; opacity: 1; pointer-events: auto; }
-        .progress-bar { height: 3px; background: #fbbf24; width: 0%; transition: width linear; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        /* Checkbox Styling */
-        input[type="checkbox"] { width: 1.2rem; height: 1.2rem; cursor: pointer; accent-color: #fbbf24; }
     </style>
 </head>
-<body class="flex flex-col">
+<body>
 
-    <!-- LOADER / GİRİŞ EKRANI -->
+    <!-- GİRİŞ LOADER -->
     <div id="loader" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center flex-col p-10 text-center">
-        <div class="w-12 h-12 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-6"></div>
-        <p id="loadStatus" class="text-amber-400 font-black text-xs tracking-widest uppercase italic">Veriler Senkronize Ediliyor...</p>
+        <div class="w-16 h-16 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-6"></div>
+        <p id="loadStatus" class="text-amber-400 font-black text-sm tracking-widest uppercase italic">Zihin Hazırlanıyor...</p>
         <div id="manualUI" class="hidden w-full max-w-sm mt-8 animate-pop">
-            <textarea id="manualInput" class="w-full h-32 bg-slate-800 border border-slate-700 rounded-2xl p-4 text-[10px] text-slate-300 mb-4 focus:outline-none focus:border-amber-400" placeholder="Tabloyu buraya yapıştırın..."></textarea>
-            <button onclick="loadManual()" class="w-full bg-amber-400 text-slate-900 py-4 rounded-xl font-black text-xs uppercase shadow-lg">Başlat</button>
+            <textarea id="manualInput" class="w-full h-32 bg-slate-800 border border-slate-700 rounded-2xl p-4 text-xs text-slate-300 mb-4 focus:outline-none focus:border-amber-400" placeholder="Tabloyu buraya yapıştırın..."></textarea>
+            <button onclick="loadManual()" class="w-full bg-amber-400 text-slate-900 py-4 rounded-2xl font-black uppercase">Başlat</button>
         </div>
     </div>
 
     <!-- HEADER -->
-    <header class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/80 backdrop-blur-md z-40">
-        <div class="flex items-center gap-2">
-            <span class="text-2xl">🇪🇸</span>
-            <div class="flex flex-col">
-                <h1 class="text-[10px] font-black text-amber-400 uppercase tracking-tighter leading-none">Vocab Master</h1>
-                <p class="text-[7px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">v4.5 Speed</p>
+    <header class="p-4 flex justify-between items-center bg-slate-900/50 backdrop-blur-md z-40">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-amber-400 rounded-xl flex items-center justify-center shadow-lg shadow-amber-400/20">
+                <span class="text-xl">🇪🇸</span>
+            </div>
+            <div>
+                <h1 class="text-xs font-black text-amber-400 uppercase tracking-wider leading-none">Vocab Master</h1>
+                <p class="text-[9px] text-slate-500 font-bold uppercase mt-1">v5.0 Material Random</p>
             </div>
         </div>
-        <div class="flex items-center gap-2">
-            <button onclick="forceRefresh()" class="p-2 bg-slate-800 rounded-full border border-slate-700 text-amber-400 active:rotate-180 transition-transform duration-500" title="Önbelleği Temizle">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
+        <div class="flex items-center gap-3">
+            <button onclick="forceRefresh()" class="w-8 h-8 flex items-center justify-center bg-slate-800 rounded-lg text-amber-400 active:rotate-180 transition-transform duration-500 border border-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
             </button>
-            <div id="stats" class="text-[9px] bg-slate-800 px-3 py-1 rounded-full text-slate-400 font-bold border border-slate-700 tracking-tighter italic">0 / 0</div>
+            <div id="stats" class="text-[10px] bg-slate-800 px-4 py-2 rounded-lg text-slate-300 font-black border border-slate-700 tracking-tighter">0 / 0</div>
         </div>
     </header>
 
-    <!-- ÇOKLU KATEGORİ SEÇİMİ (DROPDOWN) -->
-    <div id="filterSection" class="relative z-30 bg-slate-900/50 border-b border-slate-800">
-        <button onclick="toggleDropdown()" class="w-full p-4 flex items-center justify-between text-left">
+    <!-- MATERIAL CATEGORY SELECTOR -->
+    <div id="filterSection" class="relative z-30 px-4 py-2">
+        <button onclick="toggleDropdown()" class="w-full p-4 bg-slate-800 rounded-2xl border border-slate-700 flex items-center justify-between text-left shadow-lg">
             <div class="flex flex-col">
-                <span class="text-[8px] text-slate-500 font-black uppercase tracking-widest leading-none mb-1">Kategorileri Seç</span>
-                <span id="selectedCatsLabel" class="text-[10px] text-amber-400 font-black uppercase truncate max-w-[70vw]">Tüm Liste</span>
+                <span class="text-[9px] text-slate-500 font-black uppercase tracking-widest leading-none mb-1">Kategori Filtrele</span>
+                <span id="selectedCatsLabel" class="text-xs text-white font-bold truncate max-w-[200px]">Tüm Kategoriler</span>
             </div>
-            <span id="dropIcon" class="text-slate-500 text-xs transition-transform duration-300">▼</span>
+            <div class="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center text-amber-400" id="dropIcon">▼</div>
         </button>
-        <div id="dropdownMenu" class="dropdown-content absolute w-full bg-slate-800 border-b border-slate-700 shadow-2xl z-50">
-            <div id="catList" class="grid grid-cols-2 gap-2 p-4 max-h-[45vh] overflow-y-auto no-scrollbar"></div>
-            <div class="p-4 bg-slate-900/50 flex gap-2">
-                <button onclick="selectAll(true)" class="flex-1 text-[8px] font-black uppercase text-slate-400 border border-slate-700 py-2 rounded-lg">Tümünü Seç</button>
-                <button onclick="selectAll(false)" class="flex-1 text-[8px] font-black uppercase text-slate-400 border border-slate-700 py-2 rounded-lg">Temizle</button>
-                <button onclick="applyFilters()" class="flex-[2] bg-amber-400 text-slate-900 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all">Uygula</button>
+        <div id="dropdownMenu" class="dropdown-content absolute left-4 right-4 mt-2 bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl z-50">
+            <div id="catList" class="grid grid-cols-1 gap-1 p-4 max-h-[40vh] overflow-y-auto no-scrollbar"></div>
+            <div class="p-4 bg-slate-900/80 backdrop-blur-md flex gap-3 border-t border-slate-700">
+                <button onclick="selectAll(true)" class="flex-1 text-[10px] font-black uppercase text-slate-400 py-3">Hepsini Seç</button>
+                <button onclick="applyFilters()" class="flex-[2] bg-amber-400 text-slate-900 py-3 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl">Seçilenleri Başlat</button>
             </div>
         </div>
     </div>
 
-    <!-- OYNATMA İLERLEME ÇUBUĞU -->
-    <div class="w-full bg-slate-800 h-[3px]">
-        <div id="autoProgressBar" class="progress-bar"></div>
-    </div>
+    <!-- MAIN APP AREA -->
+    <main class="flex-1 flex flex-col items-center justify-center p-6 relative">
+        <!-- Autoplay Progress -->
+        <div class="absolute top-0 left-0 right-0 h-1 bg-slate-800/50 z-10">
+            <div id="autoProgressBar" class="progress-bar"></div>
+        </div>
 
-    <!-- ANA KART -->
-    <main id="app" class="flex-1 flex flex-col items-center justify-center p-4">
-        <div id="cardWrapper" class="relative w-full max-w-sm aspect-[3/4] perspective-1000 hidden">
-            <div id="vocabCard" class="card-inner w-full h-full relative cursor-pointer" onclick="handleCardClick()">
+        <!-- Card Wrapper -->
+        <div id="cardWrapper" class="card-container hidden animate-pop">
+            <div id="vocabCard" class="card-inner cursor-pointer" onclick="handleCardClick()">
                 
-                <!-- ÖN YÜZ -->
-                <div class="card-front bg-slate-800 border border-slate-700 shadow-2xl overflow-hidden flex flex-col">
-                    <div class="flex-1 bg-black relative flex items-center justify-center overflow-hidden">
-                        <img id="vImg" src="" class="w-full h-full object-cover transition-opacity duration-300 opacity-0" onload="imgLoaded(this)" onerror="handleImgErr(this)">
-                        <div id="vImgLoader" class="absolute inset-0 flex items-center justify-center bg-slate-950 text-slate-700">
-                             <div class="w-6 h-6 border-2 border-amber-400/20 border-t-amber-400 rounded-full animate-spin"></div>
+                <!-- FRONT (Material Style) -->
+                <div class="card-front bg-slate-800 overflow-hidden">
+                    <div class="relative flex-1 bg-black flex items-center justify-center overflow-hidden">
+                        <img id="vImg" src="" class="w-full h-full object-cover transition-opacity duration-500 opacity-0" onload="this.style.opacity=1" onerror="handleImgErr(this)">
+                        <div id="vImgLoader" class="absolute inset-0 flex items-center justify-center bg-slate-900">
+                             <div class="w-8 h-8 border-4 border-amber-400/20 border-t-amber-400 rounded-full animate-spin"></div>
                         </div>
-                        <div class="absolute top-4 left-4">
-                            <span id="vCat" class="bg-amber-400 text-slate-900 text-[8px] font-black px-3 py-1 rounded-full uppercase shadow-lg">---</span>
+                        <div class="absolute top-5 left-5">
+                            <span id="vCat" class="bg-amber-400 text-slate-900 text-[10px] font-black px-4 py-2 rounded-full uppercase shadow-2xl">Kategori</span>
                         </div>
                     </div>
-                    <div class="p-8 text-center bg-slate-800">
-                        <h2 id="vEs" class="text-4xl font-black text-white uppercase italic tracking-tighter mb-1">---</h2>
-                        <p class="text-slate-500 text-[8px] mt-4 uppercase tracking-[0.2em] font-bold opacity-40">Anlamı Gör</p>
+                    <div class="p-10 text-center bg-slate-800">
+                        <h2 id="vEs" class="text-4xl font-black text-white uppercase italic tracking-tighter mb-2">---</h2>
+                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-[0.3em] opacity-40">Dokun ve Öğren</p>
                     </div>
                 </div>
 
-                <!-- ARKA YÜZ -->
-                <div class="card-back bg-amber-400 shadow-2xl flex flex-col p-8 items-center justify-center text-slate-900 border-4 border-amber-300">
-                    <h3 id="vTr" class="text-4xl font-black mb-6 uppercase text-center leading-tight tracking-tighter">---</h3>
-                    <div class="w-16 h-1 bg-slate-900/10 mb-8 rounded-full"></div>
-                    <div class="text-center w-full px-2 max-h-56 overflow-y-auto no-scrollbar">
-                        <p id="vExEs" class="text-lg font-bold italic leading-tight mb-3 text-slate-800">---</p>
-                        <p id="vExTr" class="text-sm font-medium text-slate-700 opacity-80 leading-snug">---</p>
+                <!-- BACK (Material Style) -->
+                <div class="card-back bg-amber-400 p-10 items-center justify-center text-slate-900 border-8 border-amber-300/50">
+                    <h3 id="vTr" class="text-5xl font-black mb-8 uppercase text-center leading-none tracking-tighter">---</h3>
+                    <div class="w-20 h-1.5 bg-slate-900/10 mb-8 rounded-full"></div>
+                    <div class="text-center w-full px-2 max-h-60 overflow-y-auto no-scrollbar">
+                        <p id="vExEs" class="text-xl font-bold italic leading-tight mb-4 text-slate-800">---</p>
+                        <p id="vExTr" class="text-base font-semibold text-slate-700 leading-snug">---</p>
                     </div>
                 </div>
 
             </div>
+        </div>
+
+        <!-- Floating Action Buttons (Material Design) -->
+        <div id="actionButtons" class="absolute bottom-10 left-0 right-0 flex justify-center items-center gap-6 z-20">
+            <button onclick="prevVocab()" class="fab w-14 h-14 bg-slate-800 text-slate-400 rounded-2xl flex items-center justify-center border border-slate-700 text-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </button>
+            
+            <button id="playBtn" onclick="toggleAutoplay()" class="fab w-20 h-20 bg-amber-400 text-slate-900 rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-amber-400/40">
+                <span id="playIcon" class="text-3xl">▶</span>
+            </button>
+            
+            <button onclick="rndVocab()" class="fab w-14 h-14 bg-slate-800 text-amber-400 rounded-2xl flex items-center justify-center border border-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/><path d="m19 18-6-6 6-6"/></svg>
+            </button>
         </div>
     </main>
-
-    <!-- ALT KONTROLLER -->
-    <footer id="controls" class="p-4 pb-8 bg-slate-900 flex gap-3 border-t border-slate-800 hidden z-10">
-        <button onclick="prevVocab()" class="w-16 h-16 bg-slate-800 rounded-2xl text-slate-400 border border-slate-700 flex items-center justify-center active:scale-90 transition-all text-xl">←</button>
-        <button id="playBtn" onclick="toggleAutoplay()" class="flex-1 h-16 bg-amber-400 text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-tighter active:scale-95 shadow-lg flex items-center justify-center gap-2">
-            <span id="playIcon">▶</span> <span id="playText">OTOMATİK OYNAT</span>
-        </button>
-        <button onclick="nextVocab()" class="w-16 h-16 bg-slate-800 rounded-2xl text-slate-400 border border-slate-700 flex items-center justify-center active:scale-90 transition-all text-xl">→</button>
-    </footer>
 
     <script>
         const BASE_TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVk_KzWfivaADUS59R7rvyPKt9hoxUCbWEup2VlU4L38dD-ss9eu_CXIloRgpdV8OyepwLmClAcCtj/pub?gid=0&single=true&output=tsv';
         
-        // HIZ AYARLARI (Milisaniye)
-        const TIMES = { 
-            FRONT: 2200, // Ön yüz görünme süresi (Kısaltıldı)
-            BACK: 2500   // Arka yüz görünme süresi
-        };
+        const TIMES = { FRONT: 2400, BACK: 2600 };
 
         let allVocabs = [];
         let filteredVocabs = [];
@@ -155,7 +211,6 @@
 
         async function init() {
             try {
-                // Cache-Busting: URL sonuna timestamp ekleyerek her seferinde güncel veriyi çekiyoruz
                 const uniqueUrl = `${BASE_TSV_URL}&cache_bust=${Date.now()}`;
                 const response = await fetch(uniqueUrl);
                 if (!response.ok) throw new Error();
@@ -178,13 +233,9 @@
 
                     const wordEs = (cols[1] || "").trim();
                     let imgRaw = (cols[3] || "").trim();
-                    
-                    // Resim URL ayıklama: Tırnak, tab ve Sheets formüllerini temizler
                     let cleanedImg = "";
                     const urlMatch = imgRaw.match(/(https?:\/\/[^"'\s\t\)\s]+)/);
-                    if (urlMatch) {
-                        cleanedImg = urlMatch[1].replace(/[")\s]+$/, "");
-                    }
+                    if (urlMatch) cleanedImg = urlMatch[1].replace(/[")\s]+$/, "");
 
                     return {
                         cat: (cols[0] || "GENEL").toUpperCase(),
@@ -201,41 +252,57 @@
                 
                 document.getElementById('loader').classList.add('hidden');
                 document.getElementById('cardWrapper').classList.remove('hidden');
-                document.getElementById('controls').classList.remove('hidden');
                 rndVocab();
             } catch (e) { 
-                console.error("Veri işleme hatası.");
                 document.getElementById('manualUI').classList.remove('hidden');
             }
         }
 
         function forceRefresh() {
-            if (confirm("Veriler Sheets üzerinden yeniden çekilecek. Emin misiniz?")) {
-                document.getElementById('loader').classList.remove('hidden');
-                document.getElementById('manualUI').classList.add('hidden');
-                document.getElementById('loadStatus').innerText = "YENİLENİYOR...";
-                if (isAutoplayActive) toggleAutoplay();
-                init();
-            }
+            location.reload(true);
         }
 
-        // --- AUTOPLAY MANTIĞI ---
+        // --- RANDOM NAVIGATION ---
+        function rndVocab() { 
+            if (filteredVocabs.length === 0) return;
+            let n; 
+            if (filteredVocabs.length === 1) n = 0;
+            else {
+                do { n = Math.floor(Math.random() * filteredVocabs.length); } while (n === currentIndex);
+            }
+            currentIndex = n; 
+            renderCard(); 
+        }
+
+        function nextVocab() { 
+            if (isAutoplayActive) { toggleAutoplay(); rndVocab(); } // Manuel müdahale
+            else rndVocab();
+        }
+        
+        function prevVocab() { 
+            currentIndex = (currentIndex - 1 + filteredVocabs.length) % filteredVocabs.length;
+            renderCard();
+        }
+
+        // --- AUTOPLAY (RANDOM CYCLE) ---
         function toggleAutoplay() {
             isAutoplayActive = !isAutoplayActive;
             const btn = document.getElementById('playBtn');
             const icon = document.getElementById('playIcon');
-            const text = document.getElementById('playText');
             const progressBar = document.getElementById('autoProgressBar');
 
             if (isAutoplayActive) {
-                btn.classList.replace('bg-amber-400', 'bg-red-500'); btn.classList.add('text-white');
-                icon.innerText = "⏸"; text.innerText = "DURAKLAT";
+                btn.classList.add('autoplay-active', 'bg-red-500');
+                btn.classList.remove('bg-amber-400');
+                icon.innerText = "⏸";
                 startAutoplayCycle();
             } else {
-                btn.classList.replace('bg-red-500', 'bg-amber-400'); btn.classList.remove('text-white');
-                icon.innerText = "▶"; text.innerText = "OTOMATİK OYNAT";
+                btn.classList.remove('autoplay-active', 'bg-red-500');
+                btn.classList.add('bg-amber-400');
+                icon.innerText = "▶";
                 clearTimeout(autoplayTimer);
-                progressBar.style.transition = 'none'; progressBar.style.width = '0%';
+                progressBar.style.transition = 'none';
+                progressBar.style.width = '0%';
             }
         }
 
@@ -244,9 +311,9 @@
             const card = document.getElementById('vocabCard');
             const progressBar = document.getElementById('autoProgressBar');
 
-            // 1. ÖN YÜZ AŞAMASI
             card.classList.remove('card-flipped');
-            progressBar.style.transition = 'none'; progressBar.style.width = '0%';
+            progressBar.style.transition = 'none';
+            progressBar.style.width = '0%';
             
             setTimeout(() => {
                 progressBar.style.transition = `width ${TIMES.FRONT}ms linear`;
@@ -254,17 +321,16 @@
             }, 50);
 
             autoplayTimer = setTimeout(() => {
-                // 2. ARKA YÜZ AŞAMASI
                 flipCard();
-                progressBar.style.transition = 'none'; progressBar.style.width = '0%';
+                progressBar.style.transition = 'none';
+                progressBar.style.width = '0%';
                 setTimeout(() => {
                     progressBar.style.transition = `width ${TIMES.BACK}ms linear`;
                     progressBar.style.width = '100%';
                 }, 50);
 
                 autoplayTimer = setTimeout(() => {
-                    // 3. GEÇİŞ AŞAMASI
-                    nextVocab();
+                    rndVocab(); // Bir sonraki RASTGELE karta geç
                     startAutoplayCycle();
                 }, TIMES.BACK);
             }, TIMES.FRONT);
@@ -275,20 +341,26 @@
             flipCard();
         }
 
-        // --- DATA & UI ---
+        // --- UI LOGIC ---
         function renderDropdown() {
             const categories = [...new Set(allVocabs.map(v => v.cat))].sort();
             const list = document.getElementById('catList');
             list.innerHTML = categories.map(cat => `
-                <label class="flex items-center gap-3 p-3 bg-slate-900/50 rounded-xl border border-slate-700 cursor-pointer active:bg-amber-400/20 transition-colors">
-                    <input type="checkbox" value="${cat}" onchange="updateLabel()">
-                    <span class="text-[10px] font-black text-slate-300 uppercase truncate">${cat}</span>
+                <label class="flex items-center gap-4 p-4 bg-slate-900/30 rounded-2xl border border-transparent active:border-amber-400 transition-all cursor-pointer">
+                    <input type="checkbox" value="${cat}" onchange="updateLabel()" class="w-5 h-5 accent-amber-400">
+                    <span class="text-xs font-black text-slate-200 uppercase">${cat}</span>
                 </label>
             `).join('');
         }
 
-        function toggleDropdown() { document.getElementById('filterSection').classList.toggle('dropdown-open'); }
+        function toggleDropdown() { 
+            document.getElementById('filterSection').classList.toggle('dropdown-open');
+            const icon = document.getElementById('dropIcon');
+            icon.innerText = document.getElementById('filterSection').classList.contains('dropdown-open') ? "▲" : "▼";
+        }
+        
         function selectAll(s) { document.querySelectorAll('#catList input').forEach(i => i.checked = s); updateLabel(); }
+        
         function updateLabel() {
             const checked = Array.from(document.querySelectorAll('#catList input:checked')).map(i => i.value);
             selectedCategories = checked;
@@ -299,13 +371,14 @@
             filteredVocabs = selectedCategories.length === 0 ? [...allVocabs] : allVocabs.filter(v => selectedCategories.includes(v.cat));
             currentIndex = 0;
             if (document.getElementById('filterSection').classList.contains('dropdown-open')) toggleDropdown();
-            renderCard();
+            rndVocab();
         }
 
         function renderCard() {
             if (filteredVocabs.length === 0) return;
             const v = filteredVocabs[currentIndex];
             document.getElementById('vocabCard').classList.remove('card-flipped');
+            
             document.getElementById('vCat').innerText = v.cat;
             document.getElementById('vEs').innerText = v.es;
             document.getElementById('vTr').innerText = v.tr;
@@ -318,20 +391,16 @@
             imgEl.dataset.error = "false";
             loaderEl.style.display = 'flex';
             
-            // Link yoksa Pollinations ile ikon üret
-            const fallback = `https://pollinations.ai/p/${encodeURIComponent(v.es + " flat design vector icon white background")}?width=512&height=512&seed=${currentIndex}&nologo=true`;
+            const fallback = `https://image.pollinations.ai/prompt/${encodeURIComponent(v.es + " simple flat design clean vector icon white background")}?width=512&height=512&seed=${Math.floor(Math.random()*1000)}&nologo=true`;
             imgEl.src = v.img || fallback;
 
             document.getElementById('stats').innerText = `${currentIndex + 1} / ${filteredVocabs.length}`;
+            
+            // Re-trigger animation
             const wrapper = document.getElementById('cardWrapper');
             wrapper.classList.remove('animate-pop');
             void wrapper.offsetWidth;
             wrapper.classList.add('animate-pop');
-        }
-
-        function imgLoaded(img) {
-            img.style.opacity = 1;
-            document.getElementById('vImgLoader').style.display = 'none';
         }
 
         function handleImgErr(el) {
@@ -342,15 +411,9 @@
             document.getElementById('vImgLoader').style.display = 'none';
         }
 
+        function imgLoaded() { document.getElementById('vImgLoader').style.display = 'none'; }
         function loadManual() { const data = document.getElementById('manualInput').value; if (data.length > 20) startApp(data); }
         function flipCard() { document.getElementById('vocabCard').classList.toggle('card-flipped'); }
-        function nextVocab() { currentIndex = (currentIndex + 1) % filteredVocabs.length; renderCard(); }
-        function prevVocab() { currentIndex = (currentIndex - 1 + filteredVocabs.length) % filteredVocabs.length; renderCard(); }
-        function rndVocab() { 
-            if (filteredVocabs.length <= 1) return renderCard();
-            let n; do { n = Math.floor(Math.random() * filteredVocabs.length); } while (n === currentIndex);
-            currentIndex = n; renderCard(); 
-        }
 
         window.onload = init;
     </script>
