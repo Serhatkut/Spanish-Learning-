@@ -1,451 +1,389 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Vocab Master v5.4 - Persistent Visuals</title>
-    
-    <!-- Mobil Uygulama Ayarları -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23fbbf24%22/><text y=%22.75em%22 x=%225%22 font-size=%2270%22>🇪🇸</text></svg>">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Vocab Master v5.5 - Drive Images</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        :root { --sat: env(safe-area-inset-top); --sab: env(safe-area-inset-bottom); }
-        body { 
-            background-color: #0f172a; 
-            color: #f8fafc; 
-            padding-top: var(--sat); 
-            padding-bottom: var(--sab); 
-            -webkit-tap-highlight-color: transparent; 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23fbbf24%22/><text y=%22.75em%22 x=%225%22 font-size=%2270%22>🇪🇸</text></svg>">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-        .app-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 1rem;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            height: 100%;
-        }
-
-        .card-container {
-            perspective: 2000px;
-            width: 100%;
-            max-width: 420px;
-            height: 100%;
-            max-height: 72vh;
-            position: relative;
-        }
-
-        .card-inner { 
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
-            transform-style: preserve-3d; 
-            height: 100%;
-            width: 100%;
-        }
-        .card-flipped { transform: rotateY(180deg); }
-        
-        .card-front, .card-back { 
-            backface-visibility: hidden; 
-            position: absolute; 
-            top: 0; left: 0; width: 100%; height: 100%; 
-            border-radius: 2.5rem;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8);
-            border: 1px solid rgba(255,255,255,0.1);
-            overflow: hidden;
-        }
-        .card-back { transform: rotateY(180deg); }
-
-        .progress-bar-container {
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 6px;
-            background: rgba(255,255,255,0.05);
-            z-index: 60;
-        }
-        .progress-bar { 
-            height: 100%; 
-            background: #fbbf24; 
-            width: 0%; 
-            transition: width linear;
-        }
-
-        .dropdown-content { 
-            max-height: 0; 
-            overflow: hidden; 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-            opacity: 0; 
-            background: #1e293b;
-        }
-        .dropdown-open .dropdown-content { 
-            max-height: 60vh; 
-            opacity: 1; 
-            pointer-events: auto;
-            border-bottom: 3px solid #fbbf24;
-        }
-
-        .action-dock {
-            display: flex;
-            gap: 1.25rem;
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(20px);
-            padding: 12px 20px;
-            border-radius: 2.5rem;
-            border: 1px solid rgba(255,255,255,0.1);
-            margin-top: 1.5rem;
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
-        }
-
-        .fab {
-            width: 56px;
-            height: 56px;
-            border-radius: 1.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            background: rgba(255,255,255,0.05);
-            color: #fff;
-        }
-        .fab:active { transform: scale(0.9); background: #fbbf24; color: #0f172a; }
-        .fab-main { background: #fbbf24; color: #0f172a; width: 68px; height: 68px; border-radius: 1.5rem; }
-        
-        .autoplay-active { background: #ef4444 !important; color: white !important; animation: pulse-red 2s infinite; }
-        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-transition { transition: none !important; }
-    </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { --sat: env(safe-area-inset-top); --sab: env(safe-area-inset-bottom); }
+    body {
+      background-color: #0f172a; color: #f8fafc;
+      padding-top: var(--sat); padding-bottom: var(--sab);
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      overflow: hidden; height: 100vh; display: flex; flex-direction: column;
+    }
+    .app-container { flex:1; display:flex; flex-direction:column; padding:1rem; justify-content:center; align-items:center; position:relative; height:100%; }
+    .card-container { perspective:2000px; width:100%; max-width:420px; height:100%; max-height:72vh; position:relative; }
+    .card-inner { transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); transform-style: preserve-3d; height:100%; width:100%; }
+    .card-flipped { transform: rotateY(180deg); }
+    .card-front,.card-back {
+      backface-visibility:hidden; position:absolute; top:0; left:0; width:100%; height:100%;
+      border-radius:2.5rem; display:flex; flex-direction:column;
+      box-shadow:0 30px 60px -12px rgba(0,0,0,0.8);
+      border:1px solid rgba(255,255,255,0.1); overflow:hidden;
+    }
+    .card-back { transform: rotateY(180deg); }
+    .progress-bar-container { position:absolute; top:0; left:0; right:0; height:6px; background:rgba(255,255,255,0.05); z-index:60; }
+    .progress-bar { height:100%; background:#fbbf24; width:0%; transition: width linear; }
+    .dropdown-content { max-height:0; overflow:hidden; transition:all 0.4s cubic-bezier(0.4,0,0.2,1); opacity:0; background:#1e293b; }
+    .dropdown-open .dropdown-content { max-height:60vh; opacity:1; pointer-events:auto; border-bottom:3px solid #fbbf24; }
+    .action-dock {
+      display:flex; gap:1.25rem; background:rgba(30,41,59,0.7); backdrop-filter:blur(20px);
+      padding:12px 20px; border-radius:2.5rem; border:1px solid rgba(255,255,255,0.1);
+      margin-top:1.5rem; box-shadow:0 20px 40px -10px rgba(0,0,0,0.5);
+    }
+    .fab { width:56px; height:56px; border-radius:1.25rem; display:flex; align-items:center; justify-content:center;
+      transition:all 0.2s ease; cursor:pointer; background:rgba(255,255,255,0.05); color:#fff; }
+    .fab:active { transform:scale(0.9); background:#fbbf24; color:#0f172a; }
+    .fab-main { background:#fbbf24; color:#0f172a; width:68px; height:68px; border-radius:1.5rem; }
+    .autoplay-active { background:#ef4444 !important; color:white !important; animation:pulse-red 2s infinite; }
+    @keyframes pulse-red { 0%{ box-shadow:0 0 0 0 rgba(239,68,68,0.4);} 70%{ box-shadow:0 0 0 15px rgba(239,68,68,0);} 100%{ box-shadow:0 0 0 0 rgba(239,68,68,0);} }
+    .no-scrollbar::-webkit-scrollbar { display:none; }
+    .no-transition { transition:none !important; }
+  </style>
 </head>
+
 <body>
+  <div id="loader" class="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center flex-col p-10 text-center">
+    <div class="w-16 h-16 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-6"></div>
+    <p id="loadStatus" class="text-amber-400 font-black text-lg tracking-widest uppercase italic">Veriler yükleniyor...</p>
+    <div id="manualUI" class="hidden w-full max-w-sm mt-8">
+      <textarea id="manualInput" class="w-full h-32 bg-slate-800 border border-slate-700 rounded-3xl p-5 text-sm text-slate-300 mb-4 focus:outline-none focus:border-amber-400" placeholder="TSV yapıştırın..."></textarea>
+      <button onclick="loadManual()" class="w-full bg-amber-400 text-slate-900 py-4 rounded-3xl font-black uppercase">Başlat</button>
+    </div>
+  </div>
 
-    <div id="loader" class="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center flex-col p-10 text-center">
-        <div class="w-16 h-16 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-6"></div>
-        <p id="loadStatus" class="text-amber-400 font-black text-lg tracking-widest uppercase italic">Görsel Hafıza Yapılandırılıyor...</p>
-        <div id="manualUI" class="hidden w-full max-w-sm mt-8 animate-pop">
-            <textarea id="manualInput" class="w-full h-32 bg-slate-800 border border-slate-700 rounded-3xl p-5 text-sm text-slate-300 mb-4 focus:outline-none focus:border-amber-400" placeholder="TSV yapıştırın..."></textarea>
-            <button onclick="loadManual()" class="w-full bg-amber-400 text-slate-900 py-4 rounded-3xl font-black uppercase">Başlat</button>
+  <header class="z-40 bg-slate-900/90 backdrop-blur-xl border-b border-white/5">
+    <div class="p-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-amber-400 rounded-xl flex items-center justify-center text-2xl">🇪🇸</div>
+        <div>
+          <h1 class="text-xs font-black text-amber-400 uppercase tracking-tighter leading-none">Vocab Master</h1>
+          <p class="text-[9px] text-slate-500 font-bold uppercase mt-1">v5.5 Drive Images</p>
         </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="location.reload()" class="p-2.5 bg-slate-800 rounded-xl text-amber-400 border border-white/5 active:rotate-180 transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6M3 22v-6h6M2 11a10 10 0 0 1 15.67-7.2L21 8M3 16a10 10 0 0 0 18-3.3"/></svg>
+        </button>
+        <div id="stats" class="text-xs bg-slate-800 px-4 py-2 rounded-xl text-slate-200 font-black border border-white/5">0 / 0</div>
+      </div>
     </div>
 
-    <header class="z-40 bg-slate-900/90 backdrop-blur-xl border-b border-white/5">
-        <div class="p-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-amber-400 rounded-xl flex items-center justify-center text-2xl">🇪🇸</div>
-                <div>
-                    <h1 class="text-xs font-black text-amber-400 uppercase tracking-tighter leading-none">Vocab Master</h1>
-                    <p class="text-[9px] text-slate-500 font-bold uppercase mt-1">v5.4 Persistent</p>
-                </div>
+    <div id="filterSection" class="relative">
+      <button onclick="toggleDropdown()" class="w-full px-5 py-5 flex items-center justify-between text-left active:bg-white/5">
+        <div class="flex flex-col">
+          <span class="text-[9px] text-slate-500 font-black uppercase tracking-widest leading-none mb-1">Ders Seçimi</span>
+          <span id="selectedCatsLabel" class="text-base text-white font-bold truncate max-w-[70vw]">Tüm Kategoriler</span>
+        </div>
+        <div class="text-amber-400 font-bold" id="dropIcon">▼</div>
+      </button>
+
+      <div id="dropdownMenu" class="dropdown-content absolute w-full shadow-2xl z-50">
+        <div id="catList" class="grid grid-cols-1 gap-2 p-5 max-h-[50vh] overflow-y-auto no-scrollbar bg-slate-900"></div>
+        <div class="p-5 bg-slate-950 flex gap-3">
+          <button onclick="selectAll(true)" class="flex-1 text-xs font-black uppercase text-slate-400 py-4">Hepsi</button>
+          <button onclick="applyFilters()" class="flex-[2] bg-amber-400 text-slate-900 py-4 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl">Listeyi Başlat</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="progress-bar-container">
+    <div id="autoProgressBar" class="progress-bar"></div>
+  </div>
+
+  <main class="app-container">
+    <div id="cardWrapper" class="card-container hidden">
+      <div id="vocabCard" class="card-inner cursor-pointer" onclick="handleCardClick()">
+        <div class="card-front bg-slate-800">
+          <div class="relative flex-1 bg-slate-950 flex items-center justify-center overflow-hidden">
+            <img id="vImg" src="" class="w-full h-full object-cover transition-opacity duration-500 opacity-0">
+            <div id="vImgLoader" class="absolute inset-0 flex items-center justify-center bg-slate-900">
+              <div class="w-10 h-10 border-4 border-amber-400/20 border-t-amber-400 rounded-full animate-spin"></div>
             </div>
-            <div class="flex items-center gap-2">
-                <button onclick="location.reload()" class="p-2.5 bg-slate-800 rounded-xl text-amber-400 border border-white/5 active:rotate-180 transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6M3 22v-6h6M2 11a10 10 0 0 1 15.67-7.2L21 8M3 16a10 10 0 0 0 18-3.3"/></svg>
-                </button>
-                <div id="stats" class="text-xs bg-slate-800 px-4 py-2 rounded-xl text-slate-200 font-black border border-white/5">0 / 0</div>
+            <div class="absolute top-6 left-6">
+              <span id="vCat" class="bg-amber-400 text-slate-900 text-xs font-black px-5 py-2 rounded-2xl uppercase shadow-2xl">Kategori</span>
             </div>
+          </div>
+          <div class="p-10 pb-16 text-center bg-slate-800">
+            <h2 id="vEs" class="text-4xl font-black text-white uppercase italic tracking-tighter mb-2 leading-tight">---</h2>
+            <p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] opacity-40">Dokun ve Öğren</p>
+          </div>
         </div>
 
-        <div id="filterSection" class="relative">
-            <button onclick="toggleDropdown()" class="w-full px-5 py-5 flex items-center justify-between text-left active:bg-white/5">
-                <div class="flex flex-col">
-                    <span class="text-[9px] text-slate-500 font-black uppercase tracking-widest leading-none mb-1">Ders Seçimi</span>
-                    <span id="selectedCatsLabel" class="text-base text-white font-bold truncate max-w-[70vw]">Tüm Kategoriler</span>
-                </div>
-                <div class="text-amber-400 font-bold" id="dropIcon">▼</div>
-            </button>
-            <div id="dropdownMenu" class="dropdown-content absolute w-full shadow-2xl z-50">
-                <div id="catList" class="grid grid-cols-1 gap-2 p-5 max-h-[50vh] overflow-y-auto no-scrollbar bg-slate-900"></div>
-                <div class="p-5 bg-slate-950 flex gap-3">
-                    <button onclick="selectAll(true)" class="flex-1 text-xs font-black uppercase text-slate-400 py-4">Hepsi</button>
-                    <button onclick="applyFilters()" class="flex-[2] bg-amber-400 text-slate-900 py-4 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl">Listeyi Başlat</button>
-                </div>
-            </div>
+        <div class="card-back bg-amber-400 p-10 items-center justify-center text-slate-900 border-[14px] border-amber-300">
+          <h3 id="vTr" class="text-5xl font-black mb-10 uppercase text-center leading-none tracking-tighter">---</h3>
+          <div class="w-24 h-2 bg-slate-900/10 mb-10 rounded-full"></div>
+          <div class="text-center w-full px-2 max-h-64 overflow-y-auto no-scrollbar pb-10">
+            <p id="vExEs" class="text-2xl font-bold italic leading-tight mb-5 text-slate-900">---</p>
+            <p id="vExTr" class="text-lg font-semibold text-slate-800">---</p>
+          </div>
         </div>
-    </header>
-
-    <div class="progress-bar-container">
-        <div id="autoProgressBar" class="progress-bar"></div>
+      </div>
     </div>
 
-    <main class="app-container">
-        <div id="cardWrapper" class="card-container hidden">
-            <div id="vocabCard" class="card-inner cursor-pointer" onclick="handleCardClick()">
-                <div class="card-front bg-slate-800">
-                    <div class="relative flex-1 bg-slate-950 flex items-center justify-center overflow-hidden">
-                        <img id="vImg" src="" class="w-full h-full object-cover transition-opacity duration-500 opacity-0" onload="this.style.opacity=1" onerror="handleImgErr(this)">
-                        <div id="vImgLoader" class="absolute inset-0 flex items-center justify-center bg-slate-900">
-                             <div class="w-10 h-10 border-4 border-amber-400/20 border-t-amber-400 rounded-full animate-spin"></div>
-                        </div>
-                        <div class="absolute top-6 left-6">
-                            <span id="vCat" class="bg-amber-400 text-slate-900 text-xs font-black px-5 py-2 rounded-2xl uppercase shadow-2xl">Kategori</span>
-                        </div>
-                    </div>
-                    <div class="p-10 pb-16 text-center bg-slate-800">
-                        <h2 id="vEs" class="text-4xl font-black text-white uppercase italic tracking-tighter mb-2 leading-tight">---</h2>
-                        <p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] opacity-40">Dokun ve Öğren</p>
-                    </div>
-                </div>
-                <div class="card-back bg-amber-400 p-10 items-center justify-center text-slate-900 border-[14px] border-amber-300">
-                    <h3 id="vTr" class="text-5xl font-black mb-10 uppercase text-center leading-none tracking-tighter">---</h3>
-                    <div class="w-24 h-2 bg-slate-900/10 mb-10 rounded-full"></div>
-                    <div class="text-center w-full px-2 max-h-64 overflow-y-auto no-scrollbar pb-10">
-                        <p id="vExEs" class="text-2xl font-bold italic leading-tight mb-5 text-slate-900">---</p>
-                        <p id="vExTr" class="text-lg font-semibold text-slate-800">---</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div id="controls" class="action-dock hidden">
+      <button onclick="prevVocab()" class="fab">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <button id="playBtn" onclick="toggleAutoplay()" class="fab fab-main">
+        <span id="playIcon" class="text-2xl ml-1">▶</span>
+      </button>
+      <button onclick="rndVocab()" class="fab text-amber-400">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </main>
 
-        <div id="controls" class="action-dock hidden animate-pop">
-            <button onclick="prevVocab()" class="fab">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            </button>
-            <button id="playBtn" onclick="toggleAutoplay()" class="fab fab-main">
-                <span id="playIcon" class="text-2xl ml-1">▶</span>
-            </button>
-            <button onclick="rndVocab()" class="fab text-amber-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-        </div>
-    </main>
+  <script>
+    const BASE_TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVk_KzWfivaADUS59R7rvyPKt9hoxUCbWEup2VlU4L38dD-ss9eu_CXIloRgpdV8OyepwLmClAcCtj/pub?gid=0&single=true&output=tsv';
+    const TIMES = { FRONT: 2400, BACK: 2800 };
+    const PLACEHOLDER = "https://via.placeholder.com/512?text=No+Image";
 
-    <script>
-        const BASE_TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVk_KzWfivaADUS59R7rvyPKt9hoxUCbWEup2VlU4L38dD-ss9eu_CXIloRgpdV8OyepwLmClAcCtj/pub?gid=0&single=true&output=tsv';
-        const TIMES = { FRONT: 2400, BACK: 2800 };
+    let allVocabs = [];
+    let filteredVocabs = [];
+    let currentIndex = 0;
+    let selectedCategories = [];
+    let autoplayTimer = null;
+    let isAutoplayActive = false;
 
-        let allVocabs = [];
-        let filteredVocabs = [];
-        let currentIndex = 0;
-        let selectedCategories = [];
-        let autoplayTimer = null;
-        let isAutoplayActive = false;
+    async function init() {
+      try {
+        const uniqueUrl = `${BASE_TSV_URL}&cache_bust=${Date.now()}`;
+        const response = await fetch(uniqueUrl);
+        if (!response.ok) throw new Error();
+        const data = await response.text();
+        startApp(data);
+      } catch (err) {
+        document.getElementById('loadStatus').innerText = "BAĞLANTI HATASI";
+        document.getElementById('manualUI').classList.remove('hidden');
+      }
+    }
 
-        async function init() {
-            try {
-                const uniqueUrl = `${BASE_TSV_URL}&cache_bust=${Date.now()}`;
-                const response = await fetch(uniqueUrl);
-                if (!response.ok) throw new Error();
-                const data = await response.text();
-                startApp(data);
-            } catch (err) {
-                document.getElementById('loadStatus').innerText = "BAĞLANTI HATASI";
-                document.getElementById('manualUI').classList.remove('hidden');
-            }
-        }
+    function extractUrlFromCellText(cellText) {
+      const raw = (cellText || "").toString().trim();
+      if (!raw) return "";
+      const m = raw.match(/(https?:\/\/[^"'\s\t\)\s]+)/);
+      return m ? m[1].replace(/[")\s]+$/, "") : "";
+    }
 
-        function startApp(tsv) {
-            try {
-                const rows = tsv.replace(/\r/g, "").split("\n").filter(r => r.trim() !== "");
-                if (rows.length < 2) return;
+    function startApp(tsv) {
+      try {
+        const rows = tsv.replace(/\r/g, "").split("\n").filter(r => r.trim() !== "");
+        if (rows.length < 2) return;
 
-                allVocabs = rows.slice(1).map((row) => {
-                    const cols = row.split("\t");
-                    if (cols.length < 3) return null;
-                    const wordEs = (cols[1] || "").trim();
-                    let imgRaw = (cols[6] || "").trim(); // G sütunu
-                    let cleanedImg = "";
-                    const urlMatch = imgRaw.match(/(https?:\/\/[^"'\s\t\)\s]+)/);
-                    if (urlMatch) cleanedImg = urlMatch[1].replace(/[")\s]+$/, "");
+        allVocabs = rows.slice(1).map(row => {
+          const cols = row.split("\t");
+          if (cols.length < 3) return null;
 
-                    return {
-                        cat: (cols[0] || "GENEL").toUpperCase(),
-                        es: wordEs,
-                        tr: (cols[2] || "---").trim(),
-                        img: cleanedImg,
-                        exEs: (cols[4] || "").trim(),
-                        exTr: (cols[5] || "").trim()
-                    };
-                }).filter(v => v && v.es);
+          const wordEs = (cols[1] || "").trim();
 
-                renderDropdown();
-                applyFilters(); 
-                document.getElementById('loader').classList.add('hidden');
-                document.getElementById('cardWrapper').classList.remove('hidden');
-                document.getElementById('controls').classList.remove('hidden');
-                rndVocab();
-            } catch (e) { 
-                document.getElementById('manualUI').classList.remove('hidden');
-            }
-        }
+          // G sütunu (cols[6]) öncelik
+          const imgFromG = extractUrlFromCellText(cols[6] || "");
 
-        function resetCardToFront() {
-            const card = document.getElementById('vocabCard');
-            card.classList.add('no-transition');
-            card.classList.remove('card-flipped');
-            void card.offsetHeight;
-            card.classList.remove('no-transition');
-        }
+          // Opsiyonel backup: D sütununda direkt URL yazıyorsanız
+          const imgFromD = extractUrlFromCellText(cols[3] || "");
 
-        function rndVocab() { 
-            if (filteredVocabs.length === 0) return;
-            resetCardToFront();
-            setTimeout(() => {
-                let n; 
-                if (filteredVocabs.length === 1) n = 0;
-                else {
-                    do { n = Math.floor(Math.random() * filteredVocabs.length); } while (n === currentIndex);
-                }
-                currentIndex = n; 
-                updateCardContent(); 
-            }, 10);
-        }
+          return {
+            cat: (cols[0] || "GENEL").toUpperCase(),
+            es: wordEs,
+            tr: (cols[2] || "---").trim(),
+            img: imgFromG || imgFromD || "",
+            exEs: (cols[4] || "").trim(),
+            exTr: (cols[5] || "").trim()
+          };
+        }).filter(v => v && v.es);
 
-        function prevVocab() { 
-            resetCardToFront();
-            setTimeout(() => {
-                currentIndex = (currentIndex - 1 + filteredVocabs.length) % filteredVocabs.length;
-                updateCardContent();
-            }, 10);
-        }
+        renderDropdown();
+        applyFilters();
 
-        function toggleAutoplay() {
-            isAutoplayActive = !isAutoplayActive;
-            const btn = document.getElementById('playBtn');
-            const icon = document.getElementById('playIcon');
-            const progressBar = document.getElementById('autoProgressBar');
+        document.getElementById('loader').classList.add('hidden');
+        document.getElementById('cardWrapper').classList.remove('hidden');
+        document.getElementById('controls').classList.remove('hidden');
+        rndVocab();
+      } catch (e) {
+        document.getElementById('manualUI').classList.remove('hidden');
+      }
+    }
 
-            if (isAutoplayActive) {
-                btn.classList.add('autoplay-active');
-                icon.innerText = "⏸";
-                icon.classList.remove('ml-1');
-                startAutoplayCycle();
-            } else {
-                btn.classList.remove('autoplay-active');
-                icon.innerText = "▶";
-                icon.classList.add('ml-1');
-                clearTimeout(autoplayTimer);
-                progressBar.style.transition = 'none';
-                progressBar.style.width = '0%';
-            }
-        }
+    function resetCardToFront() {
+      const card = document.getElementById('vocabCard');
+      card.classList.add('no-transition');
+      card.classList.remove('card-flipped');
+      void card.offsetHeight;
+      card.classList.remove('no-transition');
+    }
 
-        function startAutoplayCycle() {
-            if (!isAutoplayActive) return;
-            const progressBar = document.getElementById('autoProgressBar');
-            resetCardToFront();
-            progressBar.style.transition = 'none';
-            progressBar.style.width = '0%';
-            setTimeout(() => {
-                progressBar.style.transition = `width ${TIMES.FRONT}ms linear`;
-                progressBar.style.width = '100%';
-            }, 50);
+    function rndVocab() {
+      if (filteredVocabs.length === 0) return;
+      resetCardToFront();
+      setTimeout(() => {
+        let n;
+        if (filteredVocabs.length === 1) n = 0;
+        else { do { n = Math.floor(Math.random() * filteredVocabs.length); } while (n === currentIndex); }
+        currentIndex = n;
+        updateCardContent();
+      }, 10);
+    }
 
-            autoplayTimer = setTimeout(() => {
-                flipCard();
-                progressBar.style.transition = 'none';
-                progressBar.style.width = '0%';
-                setTimeout(() => {
-                    progressBar.style.transition = `width ${TIMES.BACK}ms linear`;
-                    progressBar.style.width = '100%';
-                }, 50);
-                autoplayTimer = setTimeout(() => {
-                    rndVocab(); 
-                    startAutoplayCycle();
-                }, TIMES.BACK);
-            }, TIMES.FRONT);
-        }
+    function prevVocab() {
+      resetCardToFront();
+      setTimeout(() => {
+        currentIndex = (currentIndex - 1 + filteredVocabs.length) % filteredVocabs.length;
+        updateCardContent();
+      }, 10);
+    }
 
-        function handleCardClick() {
-            if (isAutoplayActive) toggleAutoplay();
-            flipCard();
-        }
+    function toggleAutoplay() {
+      isAutoplayActive = !isAutoplayActive;
+      const btn = document.getElementById('playBtn');
+      const icon = document.getElementById('playIcon');
+      const progressBar = document.getElementById('autoProgressBar');
 
-        /**
-         * Kelimeye özel benzersiz bir seed numarası üretir (Hafıza için sabit resim)
-         */
-        function getStringSeed(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = str.charCodeAt(i) + ((hash << 5) - hash);
-            }
-            return Math.abs(hash);
-        }
+      if (isAutoplayActive) {
+        btn.classList.add('autoplay-active');
+        icon.innerText = "⏸";
+        icon.classList.remove('ml-1');
+        startAutoplayCycle();
+      } else {
+        btn.classList.remove('autoplay-active');
+        icon.innerText = "▶";
+        icon.classList.add('ml-1');
+        clearTimeout(autoplayTimer);
+        progressBar.style.transition = 'none';
+        progressBar.style.width = '0%';
+      }
+    }
 
-        function updateCardContent() {
-            const v = filteredVocabs[currentIndex];
-            document.getElementById('vCat').innerText = v.cat;
-            document.getElementById('vEs').innerText = v.es;
-            document.getElementById('vTr').innerText = v.tr;
-            document.getElementById('vExEs').innerText = v.exEs ? `"${v.exEs}"` : "";
-            document.getElementById('vExTr').innerText = v.exTr || "";
-            
-            const imgEl = document.getElementById('vImg');
-            const loaderEl = document.getElementById('vImgLoader');
-            imgEl.style.opacity = 0;
-            imgEl.dataset.error = "false";
-            loaderEl.style.display = 'flex';
-            
-            const cleanWord = encodeURIComponent(v.es.replace(/^(El|La|Los|Las)\s+/i, ""));
-            
-            // YENİ: Her kelime için sabit bir seed kullanıyoruz.
-            const persistentSeed = getStringSeed(v.es);
-            
-            // Sütun doluysa FETCH, boşsa GENERATE (Sabit seed ile)
-            imgEl.src = v.img || "https://via.placeholder.com/512?text=No+Image";
-            
-            imgEl.onload = () => {
-                imgEl.style.opacity = 1;
-                loaderEl.style.display = 'none';
-            };
+    function startAutoplayCycle() {
+      if (!isAutoplayActive) return;
+      const progressBar = document.getElementById('autoProgressBar');
 
-            document.getElementById('stats').innerText = `${currentIndex + 1} / ${filteredVocabs.length}`;
-            const wrapper = document.getElementById('cardWrapper');
-            wrapper.classList.remove('animate-pop');
-            void wrapper.offsetWidth; 
-            wrapper.classList.add('animate-pop');
-        }
+      resetCardToFront();
+      progressBar.style.transition = 'none';
+      progressBar.style.width = '0%';
+      setTimeout(() => {
+        progressBar.style.transition = `width ${TIMES.FRONT}ms linear`;
+        progressBar.style.width = '100%';
+      }, 50);
 
-        function handleImgErr(el) {
-            if (el.dataset.error === "true") return;
-            el.dataset.error = "true";
-            const word = encodeURIComponent(document.getElementById('vEs').innerText);
-            el.src = ``;
-            document.getElementById('vImgLoader').style.display = 'none';
-        }
+      autoplayTimer = setTimeout(() => {
+        flipCard();
+        progressBar.style.transition = 'none';
+        progressBar.style.width = '0%';
+        setTimeout(() => {
+          progressBar.style.transition = `width ${TIMES.BACK}ms linear`;
+          progressBar.style.width = '100%';
+        }, 50);
 
-        function renderDropdown() {
-            const categories = [...new Set(allVocabs.map(v => v.cat))].sort();
-            const list = document.getElementById('catList');
-            list.innerHTML = categories.map(cat => `
-                <label class="flex items-center gap-5 p-5 bg-white/5 rounded-3xl border border-transparent active:border-amber-400 transition-all cursor-pointer">
-                    <input type="checkbox" value="${cat}" onchange="updateLabel()" class="w-6 h-6 accent-amber-400">
-                    <span class="text-sm font-black text-slate-200 uppercase tracking-tight">${cat}</span>
-                </label>
-            `).join('');
-        }
+        autoplayTimer = setTimeout(() => {
+          rndVocab();
+          startAutoplayCycle();
+        }, TIMES.BACK);
+      }, TIMES.FRONT);
+    }
 
-        function toggleDropdown() { 
-            document.getElementById('filterSection').classList.toggle('dropdown-open');
-            document.getElementById('dropIcon').innerText = document.getElementById('filterSection').classList.contains('dropdown-open') ? "▲" : "▼";
-        }
-        function selectAll(s) { document.querySelectorAll('#catList input').forEach(i => i.checked = s); updateLabel(); }
-        function updateLabel() {
-            const checked = Array.from(document.querySelectorAll('#catList input:checked')).map(i => i.value);
-            selectedCategories = checked;
-            document.getElementById('selectedCatsLabel').innerText = checked.length > 0 ? checked.join(', ') : 'Tüm Kategoriler';
-        }
-        function applyFilters() {
-            filteredVocabs = selectedCategories.length === 0 ? [...allVocabs] : allVocabs.filter(v => selectedCategories.includes(v.cat));
-            currentIndex = 0;
-            if (document.getElementById('filterSection').classList.contains('dropdown-open')) toggleDropdown();
-            rndVocab();
-        }
-        function loadManual() { const data = document.getElementById('manualInput').value; if (data.length > 20) startApp(data); }
-        function flipCard() { document.getElementById('vocabCard').classList.toggle('card-flipped'); }
+    function handleCardClick() {
+      if (isAutoplayActive) toggleAutoplay();
+      flipCard();
+    }
 
-        window.onload = init;
-    </script>
+    function updateCardContent() {
+      const v = filteredVocabs[currentIndex];
+
+      document.getElementById('vCat').innerText = v.cat;
+      document.getElementById('vEs').innerText = v.es;
+      document.getElementById('vTr').innerText = v.tr;
+      document.getElementById('vExEs').innerText = v.exEs ? `"${v.exEs}"` : "";
+      document.getElementById('vExTr').innerText = v.exTr || "";
+
+      const imgEl = document.getElementById('vImg');
+      const loaderEl = document.getElementById('vImgLoader');
+
+      imgEl.style.opacity = 0;
+      loaderEl.style.display = 'flex';
+
+      // Reset handlers
+      imgEl.onload = null;
+      imgEl.onerror = null;
+
+      const src = v.img || PLACEHOLDER;
+
+      imgEl.onload = () => {
+        imgEl.style.opacity = 1;
+        loaderEl.style.display = 'none';
+      };
+
+      imgEl.onerror = () => {
+        imgEl.src = PLACEHOLDER;
+        imgEl.style.opacity = 1;
+        loaderEl.style.display = 'none';
+      };
+
+      imgEl.src = src;
+
+      document.getElementById('stats').innerText = `${currentIndex + 1} / ${filteredVocabs.length}`;
+      const wrapper = document.getElementById('cardWrapper');
+      wrapper.classList.remove('animate-pop');
+      void wrapper.offsetWidth;
+      wrapper.classList.add('animate-pop');
+    }
+
+    function handleImgErr() { /* artık kullanılmıyor */ }
+
+    function renderDropdown() {
+      const categories = [...new Set(allVocabs.map(v => v.cat))].sort();
+      const list = document.getElementById('catList');
+      list.innerHTML = categories.map(cat => `
+        <label class="flex items-center gap-5 p-5 bg-white/5 rounded-3xl border border-transparent active:border-amber-400 transition-all cursor-pointer">
+          <input type="checkbox" value="${cat}" onchange="updateLabel()" class="w-6 h-6 accent-amber-400">
+          <span class="text-sm font-black text-slate-200 uppercase tracking-tight">${cat}</span>
+        </label>
+      `).join('');
+    }
+
+    function toggleDropdown() {
+      document.getElementById('filterSection').classList.toggle('dropdown-open');
+      document.getElementById('dropIcon').innerText =
+        document.getElementById('filterSection').classList.contains('dropdown-open') ? "▲" : "▼";
+    }
+
+    function selectAll(s) {
+      document.querySelectorAll('#catList input').forEach(i => i.checked = s);
+      updateLabel();
+    }
+
+    function updateLabel() {
+      const checked = Array.from(document.querySelectorAll('#catList input:checked')).map(i => i.value);
+      selectedCategories = checked;
+      document.getElementById('selectedCatsLabel').innerText = checked.length > 0 ? checked.join(', ') : 'Tüm Kategoriler';
+    }
+
+    function applyFilters() {
+      filteredVocabs = selectedCategories.length === 0 ? [...allVocabs] : allVocabs.filter(v => selectedCategories.includes(v.cat));
+      currentIndex = 0;
+      if (document.getElementById('filterSection').classList.contains('dropdown-open')) toggleDropdown();
+      rndVocab();
+    }
+
+    function loadManual() {
+      const data = document.getElementById('manualInput').value;
+      if (data.length > 20) startApp(data);
+    }
+
+    function flipCard() {
+      document.getElementById('vocabCard').classList.toggle('card-flipped');
+    }
+
+    window.onload = init;
+  </script>
 </body>
 </html>
