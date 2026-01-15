@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Vocab Master v5.5 - Drive Images</title>
+  <title>Vocab Master v5.6 - Drive Images (TSV Fallback)</title>
 
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23fbbf24%22/><text y=%22.75em%22 x=%225%22 font-size=%2270%22>🇪🇸</text></svg>">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -58,6 +58,7 @@
       <textarea id="manualInput" class="w-full h-32 bg-slate-800 border border-slate-700 rounded-3xl p-5 text-sm text-slate-300 mb-4 focus:outline-none focus:border-amber-400" placeholder="TSV yapıştırın..."></textarea>
       <button onclick="loadManual()" class="w-full bg-amber-400 text-slate-900 py-4 rounded-3xl font-black uppercase">Başlat</button>
     </div>
+    <p id="debugUrl" class="mt-5 text-[10px] text-slate-500 break-all hidden"></p>
   </div>
 
   <header class="z-40 bg-slate-900/90 backdrop-blur-xl border-b border-white/5">
@@ -66,7 +67,7 @@
         <div class="w-10 h-10 bg-amber-400 rounded-xl flex items-center justify-center text-2xl">🇪🇸</div>
         <div>
           <h1 class="text-xs font-black text-amber-400 uppercase tracking-tighter leading-none">Vocab Master</h1>
-          <p class="text-[9px] text-slate-500 font-bold uppercase mt-1">v5.5 Drive Images</p>
+          <p class="text-[9px] text-slate-500 font-bold uppercase mt-1">v5.6 Drive Images</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
@@ -144,9 +145,19 @@
   </main>
 
   <script>
-    // UPDATED TSV URL (EXPORT sheet gid)
+    // PRIMARY: publish TSV (sizdeki)
     const BASE_TSV_URL =
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVk_KzWfivaADUS59R7rvyPKt9hoxUCbWEup2VlU4L38dD-ss9eu_CXIloRgpdV8OyepwLmClAcCtj/pub?gid=2089607689&single=true&output=tsv';
+
+    // FALLBACK: gviz TSV (publish kaprisi varsa)
+    // 1) Spreadsheet ID + gid lazım. Sizde publish link var, burada ID görünmüyor.
+    // Eğer gviz kullanmak isterseniz buraya gerçek spreadsheetId girin:
+    const GVIZ_SPREADSHEET_ID = ""; // örn: "1oBQ1peCBJ9MEg3pKO7mfEKQC1bmCnQqAMc1BABcJIUA"
+    const GVIZ_GID = "2089607689";
+    function gvizTsvUrl() {
+      if (!GVIZ_SPREADSHEET_ID) return "";
+      return `https://docs.google.com/spreadsheets/d/${GVIZ_SPREADSHEET_ID}/gviz/tq?tqx=out:tsv&gid=${GVIZ_GID}`;
+    }
 
     const TIMES = { FRONT: 2400, BACK: 2800 };
     const PLACEHOLDER = "https://via.placeholder.com/512?text=No+Image";
@@ -158,12 +169,44 @@
     let autoplayTimer = null;
     let isAutoplayActive = false;
 
+    async function fetchWithTimeout(url, ms=12000) {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), ms);
+      try {
+        const res = await fetch(url, { signal: ctrl.signal, cache: "no-store" });
+        return res;
+      } finally {
+        clearTimeout(t);
+      }
+    }
+
+    async function loadTsv() {
+      const debugEl = document.getElementById("debugUrl");
+      debugEl.classList.remove("hidden");
+
+      // 1) primary
+      const url1 = `${BASE_TSV_URL}&cache_bust=${Date.now()}`;
+      debugEl.textContent = "TSV: " + url1;
+      try {
+        const r1 = await fetchWithTimeout(url1);
+        if (r1.ok) return await r1.text();
+      } catch (e) {}
+
+      // 2) fallback gviz (eğer ID girildi ise)
+      const url2base = gvizTsvUrl();
+      if (url2base) {
+        const url2 = `${url2base}&cache_bust=${Date.now()}`;
+        debugEl.textContent = "TSV (fallback): " + url2;
+        const r2 = await fetchWithTimeout(url2);
+        if (r2.ok) return await r2.text();
+      }
+
+      throw new Error("TSV fetch failed");
+    }
+
     async function init() {
       try {
-        const uniqueUrl = `${BASE_TSV_URL}&cache_bust=${Date.now()}`;
-        const response = await fetch(uniqueUrl);
-        if (!response.ok) throw new Error();
-        const data = await response.text();
+        const data = await loadTsv();
         startApp(data);
       } catch (err) {
         document.getElementById('loadStatus').innerText = "BAĞLANTI HATASI";
@@ -174,6 +217,7 @@
     function extractUrl(cellText) {
       const raw = (cellText || "").toString().trim();
       if (!raw) return "";
+      // =IMAGE("url") gibi gelirse de yakalar
       const m = raw.match(/(https?:\/\/[^"'\s\t\)\s]+)/);
       return m ? m[1].replace(/[")\s]+$/, "") : "";
     }
@@ -181,7 +225,7 @@
     function startApp(tsv) {
       try {
         const rows = tsv.replace(/\r/g, "").split("\n").filter(r => r.trim() !== "");
-        if (rows.length < 2) return;
+        if (rows.length < 2) throw new Error("no rows");
 
         // EXPORT TSV columns: A=cat, B=es, C=tr, D=url, E=ex_es, F=ex_tr
         allVocabs = rows.slice(1).map(row => {
@@ -209,6 +253,7 @@
         document.getElementById('controls').classList.remove('hidden');
         rndVocab();
       } catch (e) {
+        document.getElementById('loadStatus').innerText = "TSV OKUNAMADI";
         document.getElementById('manualUI').classList.remove('hidden');
       }
     }
@@ -310,7 +355,6 @@
       imgEl.style.opacity = 0;
       loaderEl.style.display = 'flex';
 
-      // reset handlers
       imgEl.onload = null;
       imgEl.onerror = null;
 
