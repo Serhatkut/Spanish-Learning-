@@ -144,7 +144,10 @@
   </main>
 
   <script>
-    const BASE_TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVk_KzWfivaADUS59R7rvyPKt9hoxUCbWEup2VlU4L38dD-ss9eu_CXIloRgpdV8OyepwLmClAcCtj/pub?gid=0&single=true&output=tsv';
+    // UPDATED TSV URL (EXPORT sheet gid)
+    const BASE_TSV_URL =
+      'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVk_KzWfivaADUS59R7rvyPKt9hoxUCbWEup2VlU4L38dD-ss9eu_CXIloRgpdV8OyepwLmClAcCtj/pub?gid=2089607689&single=true&output=tsv';
+
     const TIMES = { FRONT: 2400, BACK: 2800 };
     const PLACEHOLDER = "https://via.placeholder.com/512?text=No+Image";
 
@@ -168,7 +171,7 @@
       }
     }
 
-    function extractUrlFromCellText(cellText) {
+    function extractUrl(cellText) {
       const raw = (cellText || "").toString().trim();
       if (!raw) return "";
       const m = raw.match(/(https?:\/\/[^"'\s\t\)\s]+)/);
@@ -180,23 +183,19 @@
         const rows = tsv.replace(/\r/g, "").split("\n").filter(r => r.trim() !== "");
         if (rows.length < 2) return;
 
+        // EXPORT TSV columns: A=cat, B=es, C=tr, D=url, E=ex_es, F=ex_tr
         allVocabs = rows.slice(1).map(row => {
           const cols = row.split("\t");
           if (cols.length < 3) return null;
 
           const wordEs = (cols[1] || "").trim();
-
-          // G sütunu (cols[6]) öncelik
-          const imgFromG = extractUrlFromCellText(cols[6] || "");
-
-          // Opsiyonel backup: D sütununda direkt URL yazıyorsanız
-          const imgFromD = extractUrlFromCellText(cols[3] || "");
+          const imgUrl = extractUrl(cols[3] || ""); // D=url
 
           return {
             cat: (cols[0] || "GENEL").toUpperCase(),
             es: wordEs,
             tr: (cols[2] || "---").trim(),
-            img: imgFromG || imgFromD || "",
+            img: imgUrl,
             exEs: (cols[4] || "").trim(),
             exTr: (cols[5] || "").trim()
           };
@@ -311,7 +310,7 @@
       imgEl.style.opacity = 0;
       loaderEl.style.display = 'flex';
 
-      // Reset handlers
+      // reset handlers
       imgEl.onload = null;
       imgEl.onerror = null;
 
@@ -336,8 +335,6 @@
       void wrapper.offsetWidth;
       wrapper.classList.add('animate-pop');
     }
-
-    function handleImgErr() { /* artık kullanılmıyor */ }
 
     function renderDropdown() {
       const categories = [...new Set(allVocabs.map(v => v.cat))].sort();
