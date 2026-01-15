@@ -254,7 +254,7 @@
                     const cols = row.split("\t");
                     if (cols.length < 3) return null;
                     const wordEs = (cols[1] || "").trim();
-                    let imgRaw = (cols[3] || "").trim();
+                    let imgRaw = (cols[6] || "").trim(); // G sütunu
                     let cleanedImg = "";
                     const urlMatch = imgRaw.match(/(https?:\/\/[^"'\s\t\)\s]+)/);
                     if (urlMatch) cleanedImg = urlMatch[1].replace(/[")\s]+$/, "");
@@ -393,7 +393,7 @@
             const persistentSeed = getStringSeed(v.es);
             
             // Sütun doluysa FETCH, boşsa GENERATE (Sabit seed ile)
-            imgEl.src = v.img || `https://image.pollinations.ai/prompt/${cleanWord}%20flat%20vector%20icon%20white%20background?width=512&height=512&seed=${persistentSeed}&nologo=true`;
+            imgEl.src = v.img || "https://via.placeholder.com/512?text=No+Image";
             
             imgEl.onload = () => {
                 imgEl.style.opacity = 1;
