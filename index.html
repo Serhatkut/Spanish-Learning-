@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>İspanyolca Master v27</title>
+    <title>İspanyolca Master v28</title>
 
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 750 500%22><rect width=%22750%22 height=%22500%22 fill=%22%23c60b1e%22/><rect width=%22750%22 height=%22250%22 y=%22125%22 fill=%22%23ffc400%22/></svg>">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -35,6 +35,7 @@
         .main-tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); flex-shrink: 0; }
         .main-tab-btn { flex: 1; padding: 12px; border: none; background: transparent; color: var(--text); opacity: 0.5; font-weight: 800; font-size: 10px; text-transform: uppercase; }
         .main-tab-btn.active { opacity: 1; color: var(--accent); border-bottom: 3px solid var(--accent); }
+        .tab-vocab { color: var(--highlight) !important; border-left: 1px solid var(--border); opacity: 0.7; }
 
         .sub-nav { padding: 8px 0; border-bottom: 2px solid var(--accent); flex-shrink: 0; }
         .nav-row { display: flex; overflow-x: auto; gap: 8px; padding: 0 15px; scrollbar-width: none; }
@@ -56,30 +57,21 @@
         .ex-box { margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-left: 3px solid var(--highlight); border-radius: 8px; display: none; flex-direction: column; gap: 5px; }
         .row.active .ex-box { display: flex; }
 
-        /* MATRIX MODAL & TABLO DÜZENİ */
         #matrixModal { position: fixed; inset: 0; background: var(--modal-bg); z-index: 1000; display: none; flex-direction: column; padding: calc(10px + var(--sat)) 0 calc(10px + var(--sab)); }
         .matrix-header { display: flex; justify-content: space-between; align-items: center; padding: 0 15px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        
-        /* Sticky Cümle Alanı */
         #matrixExDisplay { padding: 12px 15px; background: var(--secondary-bg); flex-shrink: 0; border-bottom: 1px solid var(--accent); min-height: 40px; }
-        
         .matrix-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 15px; }
-        
         .table-scroll { overflow-x: auto; margin-top: 10px; width: 100%; border-radius: 10px; border: 1px solid var(--border); }
         table { border-collapse: collapse; min-width: 100%; width: max-content; }
         th { background: var(--accent); color: #000; padding: 10px 12px; text-align: left; position: sticky; top: 0; z-index: 5; }
         th small { display: block; font-size: 8px; font-weight: 900; line-height: 1; }
-        
         td { border-bottom: 1px solid var(--border); padding: 12px; border-right: 1px solid rgba(255,255,255,0.05); }
         .td-p { font-weight: 900; color: var(--accent); width: 65px; font-size: 11px; text-transform: uppercase; }
-        
         .cell-content { display: flex; flex-direction: column; gap: 2px; pointer-events: none; }
         .td-es { font-size: 13px; font-weight: 800; color: var(--text); }
         .td-tr { font-size: 10px; opacity: 0.5; }
-
         .close-matrix { background: var(--highlight); color: #000; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 900; }
 
-        /* SEARCH & BOTTOM PANEL */
         .bottom-panel { flex-shrink: 0; background: var(--bg); border-top: 1px solid var(--border); padding: 10px 15px calc(10px + var(--sab)); position: relative; }
         .next-btn { width: 100%; padding: 15px; background: var(--highlight); color: #000; border: none; border-radius: 12px; font-weight: 900; }
         .search-container { position: relative; margin-top: 10px; }
@@ -88,7 +80,6 @@
         .res-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
 
         .loader { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; color: var(--accent); z-index: 2000; }
-        @keyframes pop { from { transform: scale(0.98); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body data-theme="dark">
@@ -114,8 +105,10 @@
 
     <div id="nav-container" class="nav-wrapper" style="display:none;">
         <div class="main-tabs">
-            <button class="main-tab-btn active" id="tabSimple" onclick="switchGroup('simple')">TEMEL ZAMANLAR</button>
-            <button class="main-tab-btn" id="tabComplex" onclick="switchGroup('complex')">KALIPLAR & KİPLER</button>
+            <button class="main-tab-btn active" id="tabSimple" onclick="switchGroup('simple')">ZAMANLAR</button>
+            <button class="main-tab-btn" id="tabComplex" onclick="switchGroup('complex')">KALIPLAR</button>
+            <!-- GÜNCELLEME: GitHub Pages için güvenli navigasyon -->
+            <button class="main-tab-btn tab-vocab" onclick="window.location.assign('./vocabulary.html')">💡 KELİMELER</button>
         </div>
         <div class="sub-nav"><div class="nav-row" id="subRow"></div></div>
     </div>
@@ -137,22 +130,22 @@
     const pers = ["Yo", "Tú", "Él/Ella", "Nosotros", "Vosotros", "Ellos/Ellas"];
 
     const tSimp = [
-        { id: 'pres', n: 'Presente', t: 'Şimdiki Zaman', e: 11, tr: 12, ex: 30 },
-        { id: 'perf', n: 'Pret. Perfecto', t: 'Yakın Geçmiş', e: 5, tr: 6, ex: 27 },
-        { id: 'indef', n: 'Pret. Indefinido', t: 'Dili Geçmiş', e: 7, tr: 8, ex: 28 },
-        { id: 'imp', n: 'Pret. Imperfecto', t: 'Sürekli Geçmiş', e: 9, tr: 10, ex: 29 },
-        { id: 'fut', n: 'Futuro', t: 'Gelecek Zaman', e: 17, tr: 18, ex: 31 }
+        { id: 'pres', n: 'Presente', t: 'Şimdiki', e: 11, tr: 12, ex: 30 },
+        { id: 'perf', n: 'Perfecto', t: 'Yakın Geçmiş', e: 5, tr: 6, ex: 27 },
+        { id: 'indef', n: 'Indefinido', t: 'Dili Geçmiş', e: 7, tr: 8, ex: 28 },
+        { id: 'imp', n: 'Imperfecto', t: 'Sürekli Geçmiş', e: 9, tr: 10, ex: 29 },
+        { id: 'fut', n: 'Futuro', t: 'Gelecek', e: 17, tr: 18, ex: 31 }
     ];
     const tComp = [
-        { id: 'ira', n: 'Ir a + Inf.', t: 'Planlı Gelecek', e: 15, tr: 16, ex: 32 },
-        { id: 'estar', n: 'Estar + Ger.', t: 'Şu An Yapıyor', e: 13, tr: 14, ex: 33 },
-        { id: 'acabar', n: 'Acabar de', t: 'Henüz Yaptı', e: 19, tr: 20, ex: 34 },
+        { id: 'ira', n: 'Ir a + Inf.', t: 'Gelecek', e: 15, tr: 16, ex: 32 },
+        { id: 'estar', n: 'Estar + Ger.', t: 'Şu An', e: 13, tr: 14, ex: 33 },
+        { id: 'acabar', n: 'Acabar de', t: 'Henüz', e: 19, tr: 20, ex: 34 },
         { id: 'tener', n: 'Tener que', t: 'Zorunlu', e: 21, tr: 22, ex: 35 },
         { id: 'subj', n: 'Subjuntivo', t: 'Dilek-Şart', e: 25, tr: 26, ex: 36 }
     ];
 
     function triggerHaptic(ms = 15) { if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(ms); }
-    function changeTheme(theme) { document.body.setAttribute('data-theme', theme); localStorage.setItem('spanish_master_theme', theme); triggerHaptic(10); }
+    function changeTheme(theme) { document.body.setAttribute('data-theme', theme); localStorage.setItem('spanish_master_theme', theme); }
 
     async function start() {
         const savedTheme = localStorage.getItem('spanish_master_theme') || 'dark';
@@ -183,25 +176,16 @@
         if (f.length > 0) {
             r.innerHTML = f.map(x => `<div class="res-item" onclick="selV(${x.id})"><div><b>${x.es}</b><br><small>${x.tr}</small></div><span>➔</span></div>`).join('');
         } else {
-            // E-posta bildirim özelliği burada
-            r.innerHTML = `<div style="padding:15px; text-align:center;">
-                <div style="font-size:12px; margin-bottom:10px; opacity:0.7;">"${v}" listede bulunamadı.</div>
-                <a style="color:var(--highlight); text-decoration:none; font-weight:bold; font-size:13px;" 
-                   href="mailto:${MY_EMAIL}?subject=Eksik Fiil Bildirimi&body='${v}' kelimesini ekler misin?">
-                   ✉️ Serhat'a Bildir
-                </a>
-            </div>`;
+            r.innerHTML = `<div style="padding:15px; text-align:center;"><div style="font-size:12px; margin-bottom:10px; opacity:0.7;">"${v}" bulunamadı.</div></div>`;
         }
         r.style.display = 'block';
     }
 
     function toggleMatrix(show) {
-        triggerHaptic(20);
         const m = document.getElementById('matrixModal');
         if(!show) { m.style.display = 'none'; return; }
         const v = verbs[curV];
         document.getElementById('mVerbTitle').innerText = v.es.toUpperCase();
-        document.getElementById('matrixExDisplay').innerHTML = `<div style="text-align:center; opacity:0.5; font-size:11px; padding:10px;">Örnek için çekime dokun.</div>`;
         const buildTable = (title, list) => {
             let h = `<div style="margin-bottom:30px;"><div style="color:var(--highlight); font-size:12px; font-weight:900; margin-bottom:8px;">${title}</div><div class="table-scroll"><table><tr><th style="width:65px">Şahıs</th>`;
             list.forEach(t => h += `<th>${t.n}<small>${t.t}</small></th>`);
@@ -216,22 +200,21 @@
             h += `</table></div></div>`;
             return h;
         };
-        document.getElementById('mContent').innerHTML = buildTable('TEMEL ZAMANLAR', tSimp) + buildTable('KALIPLAR & KİPLER', tComp);
+        document.getElementById('mContent').innerHTML = buildTable('TEMEL ZAMANLAR', tSimp) + buildTable('KALIPLAR', tComp);
         m.style.display = 'flex';
     }
 
     function showMatrixEx(tenseId, pi) {
-        triggerHaptic(10);
         const v = verbs[curV];
         const bits = (v[tenseId].ex[pi] || "").split(':');
         const display = document.getElementById('matrixExDisplay');
         if (bits.length >= 2) {
-            display.innerHTML = `<div style="display:flex; flex-direction:column; gap:4px; animation: pop 0.2s ease;"><div style="color:var(--accent); font-size:9px; font-weight:900; text-transform:uppercase;">${bits[0]} (${v[tenseId].tr[pi]})</div><div style="font-size:14px; color:var(--text); font-weight:500;">${bits[1]}</div><div style="color:var(--highlight); font-size:12px; font-style:italic;">${bits[2]||""}</div></div>`;
+            display.innerHTML = `<div style="display:flex; flex-direction:column; gap:4px;"><div style="color:var(--accent); font-size:9px; font-weight:900; text-transform:uppercase;">${bits[0]} (${v[tenseId].tr[pi]})</div><div style="font-size:14px; color:var(--text);">${bits[1]}</div></div>`;
         }
     }
 
     function switchGroup(g) {
-        triggerHaptic(10); curGroup = g;
+        curGroup = g;
         document.getElementById('tabSimple').classList.toggle('active', g === 'simple');
         document.getElementById('tabComplex').classList.toggle('active', g === 'complex');
         const list = g === 'simple' ? tSimp : tComp;
@@ -240,9 +223,9 @@
         render();
     }
 
-    function setT(id) { triggerHaptic(10); curT = id; document.querySelectorAll('.t-btn').forEach(btn => btn.classList.remove('active')); document.getElementById('b-'+id).classList.add('active'); render(); }
-    function selV(id) { triggerHaptic(15); curV = verbs.findIndex(x => x.id == id); document.getElementById('sRes').style.display='none'; document.getElementById('sInp').value=""; render(); }
-    function rndVerb() { triggerHaptic(20); curV = Math.floor(Math.random()*verbs.length); render(); }
+    function setT(id) { curT = id; document.querySelectorAll('.t-btn').forEach(btn => btn.classList.remove('active')); document.getElementById('b-'+id).classList.add('active'); render(); }
+    function selV(id) { curV = verbs.findIndex(x => x.id == id); document.getElementById('sRes').style.display='none'; document.getElementById('sInp').value=""; render(); }
+    function rndVerb() { curV = Math.floor(Math.random()*verbs.length); render(); }
 
     function render() {
         const v = verbs[curV]; if(!v) return;
@@ -250,9 +233,8 @@
         const tD = v[curT];
         document.getElementById('grid').innerHTML = pers.map((p, i) => {
             const bits = (tD.ex[i] || "").split(':');
-            return `<div class="row" onclick="this.classList.toggle('active'); triggerHaptic(5);"><span class="p-label">${p}</span><div class="val-flex"><span class="es">${tD.es[i]||"-"}</span><span class="tr">${tD.tr[i]||"-"}</span></div>${bits.length>=2 ? `<div class="ex-box"><span style="color:var(--accent); font-size:10px; font-weight:900;">${bits[0]}</span><span style="font-size:16px;">${bits[1]}</span><span style="color:var(--highlight); font-size:14px; font-style:italic;">${bits[2]||""}</span></div>` : ''}</div>`;
+            return `<div class="row" onclick="this.classList.toggle('active');"><span class="p-label">${p}</span><div class="val-flex"><span class="es">${tD.es[i]||"-"}</span><span class="tr">${tD.tr[i]||"-"}</span></div>${bits.length>=2 ? `<div class="ex-box"><span style="font-size:16px;">${bits[1]}</span></div>` : ''}</div>`;
         }).join('');
-        document.getElementById('app').scrollTop = 0;
     }
     start();
 </script>
