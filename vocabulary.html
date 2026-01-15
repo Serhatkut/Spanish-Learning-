@@ -2,261 +2,161 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Vocab Master v6.2 - Pro Drive</title>
-    
-    <!-- Mobil Uygulama Ayarları -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23fbbf24%22/><text y=%22.75em%22 x=%225%22 font-size=%2270%22>🇪🇸</text></svg>">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vocab Master v7.0 - Plain</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --sat: env(safe-area-inset-top); --sab: env(safe-area-inset-bottom); }
         body { 
-            background-color: #0f172a; 
-            color: #f8fafc; 
-            padding-top: var(--sat); 
-            padding-bottom: var(--sab); 
-            -webkit-tap-highlight-color: transparent; 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            overflow: hidden;
+            background-color: #f1f5f9; 
+            color: #1e293b; 
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
             height: 100vh;
             display: flex;
             flex-direction: column;
         }
-
-        .app-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 1rem;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-
-        .card-container {
-            perspective: 2000px;
-            width: 100%;
-            max-width: 450px;
-            height: 100%;
-            max-height: 72vh;
-            position: relative;
-        }
-
-        .card-inner { 
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
-            transform-style: preserve-3d; 
-            height: 100%;
-            width: 100%;
-        }
-        .card-flipped { transform: rotateY(180deg); }
-        
-        .card-front, .card-back { 
-            backface-visibility: hidden; 
-            position: absolute; 
-            top: 0; left: 0; width: 100%; height: 100%; 
-            border-radius: 2.5rem;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255,255,255,0.08);
+        .container { flex: 1; overflow-y: auto; padding: 15px; }
+        .content-box {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
             overflow: hidden;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
         }
-        .card-back { transform: rotateY(180deg); }
-
-        /* Progress Bar */
-        .progress-bar-container {
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 6px;
-            background: rgba(255,255,255,0.05);
-            z-index: 60;
-        }
-        .progress-bar { 
-            height: 100%; 
-            background: #fbbf24; 
-            width: 0%; 
-            transition: width linear;
-        }
-
-        /* Action Dock - Card Bottom Overlay */
-        .action-dock {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 1.25rem;
-            background: rgba(15, 23, 42, 0.65);
-            backdrop-filter: blur(25px);
-            padding: 12px 24px;
-            border-radius: 2.5rem;
-            border: 1px solid rgba(255,255,255,0.1);
-            z-index: 100;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .fab {
-            width: 54px;
-            height: 54px;
-            border-radius: 1.25rem;
+        .image-container {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #e2e8f0;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
+        }
+        img { width: 100%; height: 100%; object-cover: cover; }
+        .badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.6);
             color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
         }
-        .fab:active { transform: scale(0.85); background: #fbbf24; color: #0f172a; }
-        .fab-main { background: #fbbf24; color: #0f172a; width: 68px; height: 68px; border-radius: 1.75rem; }
-        
-        .autoplay-active { background: #ef4444 !important; color: white !important; animation: pulse-red 2s infinite; }
-        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-
-        /* Category Selector Readability */
-        .dropdown-content { 
-            max-height: 0; 
-            overflow: hidden; 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-            opacity: 0; 
-            background: #1e293b;
-            border-radius: 0 0 2rem 2rem;
-        }
-        .dropdown-open .dropdown-content { 
-            max-height: 65vh; 
-            opacity: 1; 
-            pointer-events: auto;
-            border-bottom: 4px solid #fbbf24;
-        }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-transition { transition: none !important; }
-
-        /* Placeholder Styles */
-        #placeholder {
-            display: none;
-            flex-direction: column;
+        .btn {
+            transition: all 0.2s;
+            display: flex;
             align-items: center;
             justify-content: center;
-            height: 100%;
-            background: #0f172a;
-            color: #334155;
+            cursor: pointer;
         }
+        .btn:active { transform: scale(0.95); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        /* Dropdown sadeleştirme */
+        #dropdownMenu {
+            display: none;
+            background: white;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 100;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .dropdown-open #dropdownMenu { display: block; }
     </style>
 </head>
 <body>
 
-    <!-- GİRİŞ LOADER -->
-    <div id="loader" class="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center flex-col p-10 text-center">
-        <div class="w-16 h-16 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-8"></div>
-        <p id="loadStatus" class="text-amber-400 font-black text-xl tracking-widest uppercase italic">Veriler Senkronize Ediliyor...</p>
-    </div>
-
-    <!-- HEADER -->
-    <header class="z-40 bg-slate-900/90 backdrop-blur-xl border-b border-white/5">
-        <div class="p-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-amber-400 rounded-xl flex items-center justify-center text-2xl shadow-lg">🇪🇸</div>
-                <div>
-                    <h1 class="text-xs font-black text-amber-400 uppercase tracking-tighter leading-none">Vocab Master</h1>
-                    <p class="text-[9px] text-slate-500 font-bold uppercase mt-1">v6.2 Material Drive</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <button onclick="location.reload()" class="p-2.5 bg-slate-800 rounded-xl text-amber-400 border border-white/5 active:rotate-180 transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6M3 22v-6h6M2 11a10 10 0 0 1 15.67-7.2L21 8M3 16a10 10 0 0 0 18-3.3"/></svg>
-                </button>
-                <div id="stats" class="text-xs bg-slate-800 px-4 py-2 rounded-xl text-slate-200 font-black border border-white/5">0 / 0</div>
-            </div>
+    <!-- ÜST BAR -->
+    <div class="bg-white border-b p-4 flex justify-between items-center shadow-sm">
+        <div class="flex flex-col">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Vocab Master</span>
+            <span id="currentStatus" class="text-lg font-black text-indigo-600">LÜTFEN BEKLEYİN...</span>
         </div>
-
-        <!-- CATEGORY SELECTOR -->
-        <div id="filterSection" class="relative">
-            <button onclick="toggleDropdown()" class="w-full px-5 py-5 flex items-center justify-between text-left active:bg-white/5">
-                <div class="flex flex-col">
-                    <span class="text-[10px] text-slate-500 font-black uppercase tracking-widest leading-none mb-1">Ders Konusu Seç</span>
-                    <span id="selectedCatsLabel" class="text-lg text-white font-black truncate max-w-[70vw] uppercase">Tüm Liste</span>
-                </div>
-                <div class="text-amber-400 font-bold text-xl" id="dropIcon">▼</div>
+        <div class="flex items-center gap-2">
+            <button onclick="toggleDropdown()" class="bg-slate-100 p-2 rounded-lg text-slate-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="2" y1="14" x2="6" y2="14"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="18" y1="16" x2="22" y2="16"/></svg>
             </button>
-            <div id="dropdownMenu" class="dropdown-content absolute w-full shadow-2xl z-50">
-                <div id="catList" class="grid grid-cols-1 gap-2 p-5 max-h-[45vh] overflow-y-auto no-scrollbar bg-slate-900/95"></div>
-                <div class="p-5 bg-slate-950 flex gap-4">
-                    <button onclick="selectAll(true)" class="flex-1 text-xs font-black uppercase text-slate-400 py-4">Tümünü Seç</button>
-                    <button onclick="applyFilters()" class="flex-[2] bg-amber-400 text-slate-900 py-4 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl">Hepsini Başlat</button>
-                </div>
-            </div>
+            <div id="stats" class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold">0 / 0</div>
         </div>
-    </header>
-
-    <div class="progress-bar-container">
-        <div id="autoProgressBar" class="progress-bar"></div>
     </div>
 
-    <!-- MAIN APP AREA -->
-    <main class="app-container">
-        <div id="cardWrapper" class="card-container hidden">
-            
-            <div id="vocabCard" class="card-inner cursor-pointer" onclick="handleCardClick()">
-                
-                <!-- FRONT -->
-                <div class="card-front bg-slate-800">
-                    <div class="relative flex-1 bg-slate-950 flex items-center justify-center overflow-hidden">
-                        <img id="vImg" src="" class="w-full h-full object-cover transition-opacity duration-500 opacity-0" onload="imageLoaded()" onerror="handleImgErr()">
-                        <div id="placeholder" class="absolute inset-0 flex flex-col items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="mb-2 opacity-20"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                            <span class="text-[10px] font-black uppercase tracking-widest opacity-20">Görsel Yüklenemedi</span>
-                        </div>
-                        <div id="vImgLoader" class="absolute inset-0 flex items-center justify-center bg-slate-900">
-                             <div class="w-12 h-12 border-4 border-amber-400/20 border-t-amber-400 rounded-full animate-spin"></div>
-                        </div>
-                        <div class="absolute top-6 left-6">
-                            <span id="vCat" class="bg-amber-400 text-slate-900 text-[10px] font-black px-5 py-2.5 rounded-2xl uppercase shadow-2xl">Kategori</span>
-                        </div>
-                    </div>
-                    <div class="p-10 pb-32 text-center bg-slate-800">
-                        <h2 id="vEs" class="text-4xl font-black text-white uppercase italic tracking-tighter mb-2 leading-tight">---</h2>
-                        <p class="text-slate-500 text-[11px] font-black uppercase tracking-[0.4em] opacity-40 italic">Dokun ve Öğren</p>
-                    </div>
-                </div>
-
-                <!-- BACK -->
-                <div class="card-back bg-amber-400 p-10 items-center justify-center text-slate-900 border-[15px] border-amber-300">
-                    <h3 id="vTr" class="text-5xl font-black mb-8 uppercase text-center leading-none tracking-tighter">---</h3>
-                    <div class="w-20 h-2 bg-slate-900/10 mb-8 rounded-full"></div>
-                    <div class="text-center w-full px-2 max-h-64 overflow-y-auto no-scrollbar pb-32">
-                        <p id="vExEs" class="text-2xl font-bold italic leading-tight mb-4 text-slate-900">---</p>
-                        <p id="vExTr" class="text-lg font-semibold text-slate-800 leading-snug">---</p>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- ACTION DOCK OVERLAY -->
-            <div class="action-dock animate-pop">
-                <button onclick="prevVocab(); event.stopPropagation();" class="fab bg-white/5">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                </button>
-                
-                <button id="playBtn" onclick="toggleAutoplay(); event.stopPropagation();" class="fab fab-main shadow-amber-400/30">
-                    <span id="playIcon" class="text-2xl ml-1">▶</span>
-                </button>
-                
-                <button onclick="rndVocab(); event.stopPropagation();" class="fab bg-white/5 text-amber-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-            </div>
-
+    <!-- KATEGORİ SEÇİM EKRANI (TAM EKRAN OVERLAY) -->
+    <div id="dropdownMenu">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold">Kategoriler</h2>
+            <button onclick="toggleDropdown()" class="text-slate-400">Kapat</button>
         </div>
-    </main>
+        <div id="catList" class="grid grid-cols-1 gap-3 mb-20"></div>
+        <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t flex gap-2">
+            <button onclick="selectAll(true)" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Hepsini Seç</button>
+            <button onclick="applyFilters()" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-bold">Uygula</button>
+        </div>
+    </div>
+
+    <!-- ANA İÇERİK ALANI -->
+    <div class="container flex flex-col justify-center">
+        <div id="loader" class="text-center py-10">
+            <div class="inline-block w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <p class="mt-4 text-slate-500 font-medium">Veriler yükleniyor...</p>
+        </div>
+
+        <div id="app" class="hidden">
+            <div class="content-box">
+                <!-- RESİM BÖLÜMÜ -->
+                <div class="image-container">
+                    <span id="vCat" class="badge">Kategori</span>
+                    <img id="vImg" src="" alt="Kelime Görseli" onerror="this.style.display='none'; document.getElementById('imgFallback').style.display='flex'">
+                    <div id="imgFallback" class="hidden flex-col items-center justify-center text-slate-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                        <span class="text-[10px] mt-2 font-bold uppercase tracking-widest">Görsel Yok</span>
+                    </div>
+                </div>
+
+                <!-- BİLGİ BÖLÜMÜ -->
+                <div class="p-6">
+                    <div class="text-center mb-6">
+                        <h1 id="vEs" class="text-4xl font-black text-slate-900 uppercase tracking-tighter mb-1">---</h1>
+                        <h2 id="vTr" class="text-xl font-bold text-indigo-600 uppercase">---</h2>
+                    </div>
+                    
+                    <div class="space-y-4 border-t pt-6">
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Örnek Cümle (ES)</p>
+                            <p id="vExEs" class="text-lg font-medium italic text-slate-700 leading-snug">---</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Türkçe Çevirisi</p>
+                            <p id="vExTr" class="text-md font-semibold text-slate-500">---</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALT KONTROLLER -->
+    <div class="bg-white border-t p-6 flex justify-between items-center gap-4 shadow-lg">
+        <button onclick="prevVocab()" class="btn w-14 h-14 bg-slate-100 rounded-2xl text-slate-600">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <button id="playBtn" onclick="toggleAutoplay()" class="btn flex-1 h-14 bg-slate-900 text-white rounded-2xl font-bold uppercase text-sm tracking-widest">
+            <span id="playIcon" class="mr-2">▶</span> <span id="playText">OTOMATİK</span>
+        </button>
+        <button onclick="rndVocab()" class="btn w-14 h-14 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-200">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+    </div>
 
     <script>
         const TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVk_KzWfivaADUS59R7rvyPKt9hoxUCbWEup2VlU4L38dD-ss9eu_CXIloRgpdV8OyepwLmClAcCtj/pub?gid=2089607689&single=true&output=tsv';
         
-        const TIMES = { FRONT: 2400, BACK: 2800 };
-
         let allVocabs = [];
         let filteredVocabs = [];
         let currentIndex = 0;
@@ -267,215 +167,116 @@
         async function init() {
             try {
                 const response = await fetch(`${TSV_URL}&cb=${Date.now()}`);
-                if (!response.ok) throw new Error();
                 const data = await response.text();
-                startApp(data);
+                parseTSV(data);
             } catch (err) {
-                document.getElementById('loadStatus').innerText = "BAĞLANTI HATASI";
+                document.getElementById('currentStatus').innerText = "HATA!";
+                alert("Bağlantı kurulamadı.");
             }
         }
 
-        function startApp(tsv) {
-            try {
-                const rows = tsv.replace(/\r/g, "").split("\n").filter(r => r.trim() !== "");
-                if (rows.length < 2) return;
+        function parseTSV(tsv) {
+            const rows = tsv.split("\n").filter(r => r.trim() !== "");
+            allVocabs = rows.slice(1).map(row => {
+                const cols = row.split("\t");
+                return {
+                    cat: (cols[0] || "GENEL").trim(),
+                    es: (cols[1] || "").trim(),
+                    tr: (cols[2] || "").trim(),
+                    img: (cols[3] || "").trim(),
+                    exEs: (cols[4] || "").trim(),
+                    exTr: (cols[5] || "").trim()
+                };
+            }).filter(v => v.es);
 
-                allVocabs = rows.slice(1).map((row) => {
-                    const cols = row.split("\t");
-                    if (cols.length < 3) return null;
-
-                    return {
-                        cat: (cols[0] || "GENEL").toUpperCase(),
-                        es: (cols[1] || "").trim(),
-                        tr: (cols[2] || "").trim(),
-                        img: (cols[3] || "").trim(),
-                        exEs: (cols[4] || "").trim(),
-                        exTr: (cols[5] || "").trim()
-                    };
-                }).filter(v => v && v.es);
-
-                renderDropdown();
-                applyFilters(); 
-                
-                document.getElementById('loader').classList.add('hidden');
-                document.getElementById('cardWrapper').classList.remove('hidden');
-                rndVocab();
-            } catch (e) { 
-                console.error("Hata:", e);
-            }
-        }
-
-        /**
-         * GEÇİŞ HATASI FİX: Kartı anlık olarak ön yüze döndürür.
-         * no-transition sınıfı animasyonu kapatır, böylece kullanıcı arka yüzü görmez.
-         */
-        function instantResetCard() {
-            const card = document.getElementById('vocabCard');
-            card.classList.add('no-transition');
-            card.classList.remove('card-flipped');
-            void card.offsetHeight; // Reflow
-            card.classList.remove('no-transition');
-        }
-
-        function rndVocab() { 
-            if (filteredVocabs.length === 0) return;
-            instantResetCard();
+            renderCategories();
+            applyFilters();
             
-            setTimeout(() => {
-                let nextIdx;
-                if (filteredVocabs.length === 1) nextIdx = 0;
-                else {
-                    do { nextIdx = Math.floor(Math.random() * filteredVocabs.length); } while (nextIdx === currentIndex);
-                }
-                currentIndex = nextIdx;
-                updateCardUI();
-            }, 50);
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('app').classList.remove('hidden');
+            document.getElementById('currentStatus').innerText = "HAZIR";
+        }
+
+        function renderCategories() {
+            const cats = [...new Set(allVocabs.map(v => v.cat))].sort();
+            document.getElementById('catList').innerHTML = cats.map(cat => `
+                <label class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer active:bg-indigo-50">
+                    <input type="checkbox" value="${cat}" class="w-6 h-6 rounded accent-indigo-600">
+                    <span class="font-bold text-slate-700">${cat}</span>
+                </label>
+            `).join('');
+        }
+
+        function toggleDropdown() {
+            document.body.classList.toggle('dropdown-open');
+        }
+
+        function selectAll(s) {
+            document.querySelectorAll('#catList input').forEach(i => i.checked = s);
+        }
+
+        function applyFilters() {
+            const checked = Array.from(document.querySelectorAll('#catList input:checked')).map(i => i.value);
+            selectedCategories = checked;
+            filteredVocabs = checked.length === 0 ? [...allVocabs] : allVocabs.filter(v => checked.includes(v.cat));
+            currentIndex = 0;
+            document.body.classList.remove('dropdown-open');
+            rndVocab();
+        }
+
+        function renderCard() {
+            if (filteredVocabs.length === 0) return;
+            const v = filteredVocabs[currentIndex];
+            
+            document.getElementById('vCat').innerText = v.cat;
+            document.getElementById('vEs').innerText = v.es;
+            document.getElementById('vTr').innerText = v.tr;
+            document.getElementById('vExEs').innerText = v.exEs || "Örnek cümle bulunamadı.";
+            document.getElementById('vExTr').innerText = v.exTr || "";
+            
+            const imgEl = document.getElementById('vImg');
+            document.getElementById('imgFallback').style.display = 'none';
+            imgEl.style.display = 'block';
+            imgEl.src = v.img || "";
+
+            document.getElementById('stats').innerText = `${currentIndex + 1} / ${filteredVocabs.length}`;
+        }
+
+        function rndVocab() {
+            if (filteredVocabs.length < 2) { currentIndex = 0; }
+            else {
+                let n; do { n = Math.floor(Math.random() * filteredVocabs.length); } while (n === currentIndex);
+                currentIndex = n;
+            }
+            renderCard();
         }
 
         function prevVocab() {
-            instantResetCard();
-            setTimeout(() => {
-                currentIndex = (currentIndex - 1 + filteredVocabs.length) % filteredVocabs.length;
-                updateCardUI();
-            }, 50);
+            currentIndex = (currentIndex - 1 + filteredVocabs.length) % filteredVocabs.length;
+            renderCard();
         }
 
         function toggleAutoplay() {
             isAutoplayActive = !isAutoplayActive;
             const btn = document.getElementById('playBtn');
-            const icon = document.getElementById('playIcon');
-            const progressBar = document.getElementById('autoProgressBar');
-
             if (isAutoplayActive) {
-                btn.classList.add('autoplay-active');
-                icon.innerText = "⏸";
-                icon.classList.remove('ml-1');
-                startAutoplayCycle();
+                btn.classList.replace('bg-slate-900', 'bg-red-500');
+                document.getElementById('playIcon').innerText = "⏸";
+                startAutoplay();
             } else {
-                btn.classList.remove('autoplay-active');
-                icon.innerText = "▶";
-                icon.classList.add('ml-1');
+                btn.classList.replace('bg-red-500', 'bg-slate-900');
+                document.getElementById('playIcon').innerText = "▶";
                 clearTimeout(autoplayTimer);
-                progressBar.style.transition = 'none';
-                progressBar.style.width = '0%';
             }
         }
 
-        function startAutoplayCycle() {
+        function startAutoplay() {
             if (!isAutoplayActive) return;
-            const progressBar = document.getElementById('autoProgressBar');
-            instantResetCard();
-            progressBar.style.transition = 'none';
-            progressBar.style.width = '0%';
-            
-            setTimeout(() => {
-                progressBar.style.transition = `width ${TIMES.FRONT}ms linear`;
-                progressBar.style.width = '100%';
-            }, 50);
-
             autoplayTimer = setTimeout(() => {
-                flipCard();
-                progressBar.style.transition = 'none';
-                progressBar.style.width = '0%';
-                setTimeout(() => {
-                    progressBar.style.transition = `width ${TIMES.BACK}ms linear`;
-                    progressBar.style.width = '100%';
-                }, 50);
-
-                autoplayTimer = setTimeout(() => {
-                    rndVocab(); 
-                    startAutoplayCycle();
-                }, TIMES.BACK);
-            }, TIMES.FRONT);
+                rndVocab();
+                startAutoplay();
+            }, 3500);
         }
-
-        function handleCardClick() {
-            if (isAutoplayActive) toggleAutoplay();
-            flipCard();
-        }
-
-        /**
-         * DRIVE LİNK FİX VE UI GÜNCELLEME
-         */
-        function updateCardUI() {
-            const v = filteredVocabs[currentIndex];
-            document.getElementById('vCat').innerText = v.cat;
-            document.getElementById('vEs').innerText = v.es;
-            document.getElementById('vTr').innerText = v.tr;
-            document.getElementById('vExEs').innerText = v.exEs ? `"${v.exEs}"` : "";
-            document.getElementById('vExTr').innerText = v.exTr || "";
-            
-            const imgEl = document.getElementById('vImg');
-            const loaderEl = document.getElementById('vImgLoader');
-            const placeholderEl = document.getElementById('placeholder');
-            
-            imgEl.style.opacity = 0;
-            placeholderEl.style.display = 'none';
-            loaderEl.style.display = 'flex';
-            
-            // DRIVE LİNK İŞLEME: Link zaten uc?export formatındaysa dokunma, değilse çevir.
-            let finalUrl = v.img || "";
-            if (finalUrl && finalUrl.includes('drive.google.com') && !finalUrl.includes('uc?')) {
-                const driveIdMatch = finalUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || finalUrl.match(/id=([a-zA-Z0-9_-]+)/);
-                if (driveIdMatch && driveIdMatch[1]) {
-                    finalUrl = `https://drive.google.com/uc?export=view&id=${driveIdMatch[1]}`;
-                }
-            }
-
-            if (!finalUrl) {
-                handleImgErr();
-            } else {
-                imgEl.src = finalUrl;
-            }
-
-            document.getElementById('stats').innerText = `${currentIndex + 1} / ${filteredVocabs.length}`;
-            const wrapper = document.getElementById('cardWrapper');
-            wrapper.classList.remove('animate-pop');
-            void wrapper.offsetWidth; 
-            wrapper.classList.add('animate-pop');
-        }
-
-        function imageLoaded() {
-            document.getElementById('vImg').style.opacity = 1;
-            document.getElementById('vImgLoader').style.display = 'none';
-            document.getElementById('placeholder').style.display = 'none';
-        }
-
-        function handleImgErr() {
-            document.getElementById('vImg').style.opacity = 0;
-            document.getElementById('vImgLoader').style.display = 'none';
-            document.getElementById('placeholder').style.display = 'flex';
-        }
-
-        // --- UI UTILS ---
-        function renderDropdown() {
-            const categories = [...new Set(allVocabs.map(v => v.cat))].sort();
-            const list = document.getElementById('catList');
-            list.innerHTML = categories.map(cat => `
-                <label class="flex items-center gap-5 p-5 bg-white/5 rounded-3xl border border-transparent active:border-amber-400 transition-all cursor-pointer">
-                    <input type="checkbox" value="${cat}" onchange="updateLabel()" class="w-8 h-8 accent-amber-400">
-                    <span class="text-base font-black text-slate-200 uppercase tracking-tight">${cat}</span>
-                </label>
-            `).join('');
-        }
-
-        function toggleDropdown() { 
-            document.getElementById('filterSection').classList.toggle('dropdown-open');
-            document.getElementById('dropIcon').innerText = document.getElementById('filterSection').classList.contains('dropdown-open') ? "▲" : "▼";
-        }
-        function selectAll(s) { document.querySelectorAll('#catList input').forEach(i => i.checked = s); updateLabel(); }
-        function updateLabel() {
-            const checked = Array.from(document.querySelectorAll('#catList input:checked')).map(i => i.value);
-            selectedCategories = checked;
-            document.getElementById('selectedCatsLabel').innerText = checked.length > 0 ? checked.join(', ') : 'Tüm Kategoriler';
-        }
-        function applyFilters() {
-            filteredVocabs = selectedCategories.length === 0 ? [...allVocabs] : allVocabs.filter(v => selectedCategories.includes(v.cat));
-            currentIndex = 0;
-            if (document.getElementById('filterSection').classList.contains('dropdown-open')) toggleDropdown();
-            rndVocab();
-        }
-        function flipCard() { document.getElementById('vocabCard').classList.toggle('card-flipped'); }
 
         window.onload = init;
     </script>
